@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 export default defineConfig({
   // Local dev uses prisma/schema.prisma (SQLite).
@@ -10,6 +10,8 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    // Fallback keeps `prisma generate` working even when DATABASE_URL
+    // is not set yet (e.g. first Vercel build before env vars are added).
+    url: process.env.DATABASE_URL ?? "file:./dev.db",
   },
 });
