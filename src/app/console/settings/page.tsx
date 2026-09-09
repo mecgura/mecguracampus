@@ -21,6 +21,7 @@ export default function SettingsPage() {
   const [sid, setSid] = useState("");
   const [keys, setKeys] = useState({ razorpayKeyId: "", razorpayKeySecret: "", whatsappKey: "", whatsappProvider: "interakt" });
   const [msg, setMsg] = useState("");
+  const [lastBackup, setLastBackup] = useState("");
 
   const load = useCallback(async () => {
     const [a, b] = await Promise.all([fetch("/api/settings"), fetch("/api/schools")]);
@@ -29,6 +30,7 @@ export default function SettingsPage() {
       const map: Record<string, string> = {};
       j.settings.forEach((s: { key: string; value: string }) => { map[s.key] = s.value; });
       setVals(map);
+      if (map.backup_last) setLastBackup(new Date(map.backup_last).toLocaleString("en-IN"));
     }
     if (b.ok) {
       const list: School[] = (await b.json()).schools;
@@ -60,6 +62,19 @@ export default function SettingsPage() {
         whatsappProvider: s.whatsappProvider ?? "interakt",
       });
     }
+  }
+
+  async function downloadBackup(format: string) {
+    setMsg("");
+    const r = await fetch(`/api/backup?format=${format}`);
+    if (!r.ok) { setMsg("Backup failed."); return; }
+    const blob = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `mecguracampus-${new Date().toISOString().slice(0, 10)}.${format === "sqlite" ? "db" : "json"}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setMsg("Backup downloaded. Store one copy outside this computer every week.");
   }
 
   async function saveBrand() {
@@ -137,6 +152,16 @@ export default function SettingsPage() {
         </div>
         <button className="btn btn-g" onClick={saveKeys} type="button">Save Institute Keys</button>
         <p className="small mt">Empty = demo mode (logged, not sent). Fill a school&apos;s own keys → its fees + WhatsApp go live instantly. Platform env keys remain as fallback.</p>
+      </div>
+
+      <div className="card mt">
+        <h2>Weekly Backup — school data is an amanat</h2>
+        <p className="small">Last backup: <b>{lastBackup || "never — download one today"}</b></p>
+        <div className="mt" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button className="btn btn-d btn-sm" onClick={() => downloadBackup("json")} type="button">Download Full Backup (JSON)</button>
+          <button className="btn btn-o btn-sm" onClick={() => downloadBackup("sqlite")} type="button">Download Database File</button>
+        </div>
+        <p className="small mt">Rule: every Sunday, download + keep one copy on pen drive / Google Drive. VPS te baad ch auto-backup script (<b>scripts/backup.sh</b>) laguga.</p>
       </div>
 
       <div className="card mt" style={{ maxWidth: 640 }}>
