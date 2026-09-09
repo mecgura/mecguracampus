@@ -106,6 +106,34 @@ export const starSchema = z.object({
 });
 export type StarInput = z.infer<typeof starSchema>;
 
+export const TRIP_KINDS = ["TRIP_START", "SCHOOL_REACHED", "RETURN_START", "STOP_DROPPED"] as const;
+
+export const tripSchema = z.object({
+  busId: z.string().min(1),
+  key: z.string().min(1),
+  kind: z.enum(TRIP_KINDS),
+  note: z.string().max(120).optional().default(""),
+  studentId: z.string().optional().default(""),
+  studentName: z.string().max(120).optional().default(""),
+});
+export type TripInput = z.infer<typeof tripSchema>;
+
+export const voiceSchema = z.object({
+  recipient: z.string().min(2).max(160),
+  text: z.string().min(2).max(600),
+  language: z.enum(["Punjabi", "Hindi", "English"]).default("Punjabi"),
+  schoolId: z.string().optional(),
+});
+export type VoiceInput = z.infer<typeof voiceSchema>;
+
+export const sosSchema = z.object({
+  busId: z.string().optional().default(""),
+  key: z.string().optional().default(""),
+  note: z.string().max(300).optional().default(""),
+  raisedBy: z.string().max(40).optional().default("Driver"),
+});
+export type SosInput = z.infer<typeof sosSchema>;
+
 export const STAGES_APPLICATION = ["Applied", "Screening", "Interview", "Demo", "Offer", "Hired", "Rejected"] as const;
 export const STAGES_LEAD = ["New", "Contacted", "Visit Scheduled", "Visited", "Admitted", "Lost"] as const;
 

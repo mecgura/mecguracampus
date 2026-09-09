@@ -19,7 +19,7 @@ export async function GET() {
   const schoolIds = [...new Set(kids.map((k) => k.schoolId))];
   const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const [notices, buses, messages, presence, stars] = await Promise.all([
+  const [notices, buses, messages, presence, stars, trips] = await Promise.all([
     db.notice.findMany({
       where: { schoolId: { in: schoolIds } },
       include: { school: { select: { name: true } } },
@@ -44,6 +44,18 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       take: 20,
     }),
+    db.tripEvent.findMany({
+      where: {
+        schoolId: { in: schoolIds },
+        OR: [
+          { studentName: { in: kids.map((k) => k.name) } },
+          { kind: { in: ["TRIP_START", "SCHOOL_REACHED", "RETURN_START"] } },
+        ],
+      },
+      include: { bus: { select: { number: true } } },
+      orderBy: { at: "desc" },
+      take: 15,
+    }),
   ]);
   const presentMap = new Map(presence.map((p) => [p.studentId, p.present]));
   const starMap = new Map<string, number>();
@@ -59,5 +71,9 @@ export async function GET() {
       exams: k.exams, receipts: k.receipts,
     })),
     notices, buses, messages, stars,
+    trips: trips.map((t) => ({
+      id: t.id, kind: t.kind, note: t.note, studentName: t.studentName,
+      bus: t.bus.number, at: t.at,
+    })),
   });
 }

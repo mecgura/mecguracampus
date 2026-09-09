@@ -57,6 +57,9 @@ model School {
   menus    MealMenu[]
   leaves   StaffLeave[]
   stars    StarPoint[]
+  trips    TripEvent[]
+  voices   VoiceQueue[]
+  sos      SosAlert[]
 
   @@index([status])
 }
@@ -113,6 +116,8 @@ model Bus {
   schoolId  String?
   school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
   pings     BusPing[]
+  trips     TripEvent[]
+  sosAlerts SosAlert[]
 }
 
 model BusPing {
@@ -247,6 +252,52 @@ model StarPoint {
 
   @@index([studentId])
   @@index([schoolId])
+}
+
+// ---- Child Safety: trip timeline, drop alerts, voice, SOS ----
+model TripEvent {
+  id          String   @id @default(cuid())
+  busId       String
+  bus         Bus      @relation(fields: [busId], references: [id], onDelete: Cascade)
+  schoolId    String?
+  school      School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  kind        String // TRIP_START|SCHOOL_REACHED|RETURN_START|STOP_DROPPED
+  note        String   @default("") // stop name / details
+  studentId   String?
+  studentName String   @default("")
+  at          DateTime @default(now())
+
+  @@index([busId])
+  @@index([schoolId])
+  @@index([at])
+}
+
+model VoiceQueue {
+  id        String   @id @default(cuid())
+  schoolId  String?
+  school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  recipient String
+  text      String
+  language  String   @default("Punjabi")
+  status    String   @default("Queued") // Queued|Sent
+  createdAt DateTime @default(now())
+
+  @@index([schoolId])
+}
+
+model SosAlert {
+  id        String   @id @default(cuid())
+  busId     String?
+  bus       Bus?     @relation(fields: [busId], references: [id], onDelete: SetNull)
+  schoolId  String?
+  school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  raisedBy  String   @default("Driver")
+  note      String   @default("")
+  status    String   @default("Open") // Open|Resolved
+  createdAt DateTime @default(now())
+
+  @@index([schoolId])
+  @@index([status])
 }
 
 // ---- Notices / Homework (school → parent app) ----

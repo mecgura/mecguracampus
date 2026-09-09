@@ -6,14 +6,27 @@ interface Bus {
   id: string; number: string; route: string; kids: number;
   status: string; position: number; speed: number; at: string | null;
 }
+interface Trip { id: string; kind: string; note: string; studentName: string; bus: { number: string }; at: string }
+interface Sos { id: string; note: string; raisedBy: string; status: string; createdAt: string; bus: { number: string } | null }
+
+const KIND_LABEL: Record<string, string> = {
+  TRIP_START: "Started → school", SCHOOL_REACHED: "Reached school",
+  RETURN_START: "Return trip started", STOP_DROPPED: "Child dropped ✓",
+};
 
 export default function TransportPage() {
   const [buses, setBuses] = useState<Bus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [sos, setSos] = useState<Sos[]>([]);
 
   const load = useCallback(async () => {
-    const r = await fetch("/api/tracking/live");
-    if (r.ok) setBuses((await r.json()).buses);
+    const [a, b, c] = await Promise.all([
+      fetch("/api/tracking/live"), fetch("/api/trips/events"), fetch("/api/sos"),
+    ]);
+    if (a.ok) setBuses((await a.json()).buses);
+    if (b.ok) setTrips((await b.json()).events);
+    if (c.ok) setSos((await c.json()).alerts);
     setLoading(false);
   }, []);
 
@@ -24,6 +37,15 @@ export default function TransportPage() {
   }, [load]);
 
   const offline = buses.filter((b) => b.status !== "Live");
+  const openSos = sos.filter((s) => s.status === "Open");
+
+  async function resolveSos(id: string) {
+    await fetch("/api/sos", {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    load();
+  }
 
   return (
     <div>
@@ -36,6 +58,18 @@ export default function TransportPage() {
           <a className="btn btn-o" href="/driver" target="_blank" rel="noreferrer">Open Driver App</a>
         </div>
       </div>
+      {openSos.length > 0 ? (
+        <div className="card mt" style={{ border: "2px solid #ef4444", background: "#fee2e2" }}>
+          <h2>🆘 {openSos.length} SOS OPEN — act now</h2>
+          {openSos.map((s) => (
+            <div className="check" key={s.id}>
+              <span className="box"></span>
+              <span style={{ flex: 1 }}><b>{s.bus?.number ?? "Campus"}</b> — {s.note || "Emergency"} <span className="small">• {s.raisedBy} • {new Date(s.createdAt).toLocaleString("en-IN")}</span></span>
+              <button className="btn btn-g btn-sm" onClick={() => resolveSos(s.id)} type="button">Resolve</button>
+            </div>
+          ))}
+        </div>
+      ) : null}
       {loading ? <div className="skel" /> : (
         <div className="grid2">
           {buses.map((b) => (
@@ -62,6 +96,24 @@ export default function TransportPage() {
           ))}
         </div>
       )}
+      <div className="card mt">
+        <h2>Trip Timeline — every pickup, drop &amp; arrival</h2>
+        {trips.length === 0 ? <p className="small">No trip updates yet. Driver presses the buttons in the Driver App.</p> : (
+          <div style={{ overflowX: "auto" }}>
+            <table className="tbl"><tbody>
+              <tr><th>Time</th><th>Bus</th><th>Event</th><th>Details</th></tr>
+              {trips.slice(0, 15).map((t) => (
+                <tr key={t.id}>
+                  <td className="small">{new Date(t.at).toLocaleString("en-IN")}</td>
+                  <td><b>{t.bus.number}</b></td>
+                  <td>{t.kind === "STOP_DROPPED" ? <span className="bdg g">Child dropped ✓</span> : <span className="bdg b">{KIND_LABEL[t.kind] ?? t.kind}</span>}</td>
+                  <td className="small">{t.studentName ? `${t.studentName} • ` : ""}{t.note || "—"}</td>
+                </tr>
+              ))}
+            </tbody></table>
+          </div>
+        )}
+      </div>
       <div className="card mt">
         <h2>Safety &amp; Speed Alerts</h2>
         {offline.length === 0

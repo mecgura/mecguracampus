@@ -24,6 +24,23 @@ export async function POST(req: Request) {
   if (bus.status !== "Live" || bus.position !== parsed.data.position) {
     await db.bus.update({ where: { id: bus.id }, data: { status: "Live", position: parsed.data.position } });
   }
+  // Safety: overspeed auto-alert (throttled — max one per bus per 30 minutes).
+  const speed = parsed.data.speed ?? 0;
+  if (speed >= 60 && bus.schoolId) {
+    const since = new Date(Date.now() - 30 * 60 * 1000);
+    const recent = await db.messageLog.findFirst({
+      where: { template: { startsWith: "Overspeed Alert" }, schoolId: bus.schoolId, createdAt: { gte: since } },
+    });
+    if (!recent) {
+      await db.messageLog.create({
+        data: {
+          recipient: `School Office (${bus.number})`,
+          template: `Overspeed Alert — ${bus.number} at ${speed} km/h`,
+          language: "English", status: "Sent", schoolId: bus.schoolId,
+        },
+      });
+    }
+  }
   // Retain only the latest 200 pings per bus.
   const extra = await db.busPing.findMany({ where: { busId: bus.id }, orderBy: { at: "desc" }, skip: 200, select: { id: true } });
   if (extra.length) await db.busPing.deleteMany({ where: { id: { in: extra.map((p) => p.id) } } });

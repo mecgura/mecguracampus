@@ -20,6 +20,12 @@ interface DayInfo {
 }
 interface Notice { id: string; title: string; body: string; audience: string; createdAt: string; school: { name: string } | null }
 interface Bus { id: string; number: string; route: string; status: string }
+interface Trip { id: string; kind: string; note: string; studentName: string; bus: string; at: string }
+
+const TRIP_LABEL: Record<string, string> = {
+  TRIP_START: "Bus left for school", SCHOOL_REACHED: "Bus reached school",
+  RETURN_START: "Bus started return", STOP_DROPPED: "Dropped ✓",
+};
 interface Msg { id: string; recipient: string; template: string; language: string; status: string }
 
 function inr(n: number) {
@@ -32,6 +38,7 @@ export default function ParentHome() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [payMsg, setPayMsg] = useState("");
   const [day, setDay] = useState<DayInfo | null>(null);
@@ -46,6 +53,7 @@ export default function ParentHome() {
       setNotices(j.notices);
       setBuses(j.buses);
       setMsgs(j.messages);
+      setTrips(j.trips ?? []);
       const firstSchool = j.kids?.[0]?.schoolId;
       if (firstSchool) {
         const d = await fetch(`/api/school-day?schoolId=${firstSchool}`);
@@ -161,6 +169,17 @@ export default function ParentHome() {
             <b>{n.title}</b>
             <div className="small">{n.body}</div>
             <div className="small">{n.school?.name} • {new Date(n.createdAt).toLocaleDateString("en-IN")}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card mt">
+        <h2>Today&apos;s Journey — live safety timeline</h2>
+        {trips.length === 0 ? <p className="small">No trip updates yet today.</p> : trips.slice(0, 8).map((t) => (
+          <div className="check done" key={t.id}>
+            <span className="box">✓</span>
+            <span><b>{TRIP_LABEL[t.kind] ?? t.kind}</b> <span className="small">• {t.bus}</span><br />
+            <span className="small">{t.studentName ? `${t.studentName} • ` : ""}{t.note || ""} • {new Date(t.at).toLocaleTimeString("en-IN")}</span></span>
           </div>
         ))}
       </div>
