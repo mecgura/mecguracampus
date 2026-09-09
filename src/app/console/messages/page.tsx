@@ -13,6 +13,8 @@ export default function MessagesPage() {
   const [lang, setLang] = useState("Punjabi");
   const [to, setTo] = useState("Class 10-A Parents (86)");
   const [msg, setMsg] = useState("");
+  const [noticeTitle, setNoticeTitle] = useState("");
+  const [noticeBody, setNoticeBody] = useState("");
 
   const load = useCallback(async () => {
     const r = await fetch("/api/messages");
@@ -35,6 +37,17 @@ export default function MessagesPage() {
     else setMsg("Send failed.");
   }
 
+  async function sendNotice() {
+    setMsg("");
+    if (noticeTitle.trim().length < 2) { setMsg("Write a notice title first."); return; }
+    const r = await fetch("/api/notices", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: noticeTitle.trim(), body: noticeBody.trim(), audience: "Parents", sendWhatsapp: true }),
+    });
+    if (r.ok) { setNoticeTitle(""); setNoticeBody(""); setMsg("Notice published to Parent Apps + WhatsApp log."); load(); }
+    else setMsg("Notice failed.");
+  }
+
   return (
     <div>
       <div className="mc-top">
@@ -44,7 +57,18 @@ export default function MessagesPage() {
         </div>
       </div>
       {msg ? <p className="alert info">{msg}</p> : null}
-      <div className="grid2">
+      <div className="card mt">
+        <h2>School Notice — publishes to Parent Apps</h2>
+        <div className="fld"><label>Title</label>
+          <input className="inp" value={noticeTitle} onChange={(e) => setNoticeTitle(e.target.value)} placeholder="e.g. PTM on Saturday at 10 AM" />
+        </div>
+        <div className="fld"><label>Details</label>
+          <input className="inp" value={noticeBody} onChange={(e) => setNoticeBody(e.target.value)} placeholder="Where, when, what to bring…" />
+        </div>
+        <button className="btn btn-d btn-sm" onClick={sendNotice} type="button">Publish Notice</button>
+        <span className="small"> Appears instantly in every parent&apos;s app + WhatsApp log.</span>
+      </div>
+      <div className="grid2 mt">
         <div className="card">
           <h2>Compose &amp; Send</h2>
           <div className="fld"><label>Template</label>

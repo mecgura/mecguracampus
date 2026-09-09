@@ -5,19 +5,26 @@ import { getToken } from "next-auth/jwt";
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isConsole = pathname === "/console" || pathname.startsWith("/console/");
-  if (!isConsole) return NextResponse.next();
+  const isParent = pathname === "/parent" || pathname.startsWith("/parent/");
+  if (!isConsole && !isParent) return NextResponse.next();
 
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
   const role = (token as { role?: string } | null)?.role;
-  if (!token || (role !== "super" && role !== "school")) {
+
+  if (isConsole && (!token || (role !== "super" && role !== "school"))) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", pathname);
     loginUrl.searchParams.set("error", "unauthorized");
+    return NextResponse.redirect(loginUrl);
+  }
+  if (isParent && (!token || (role !== "parent" && role !== "super"))) {
+    const loginUrl = new URL("/login", req.nextUrl.origin);
+    loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/console", "/console/:path*"],
+  matcher: ["/console", "/console/:path*", "/parent", "/parent/:path*"],
 };

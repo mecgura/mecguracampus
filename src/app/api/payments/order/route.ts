@@ -5,7 +5,7 @@ import { createFeeOrder } from "@/lib/razorpay";
 /** Creates a payment order for a student's dues.
  *  Uses the school's own Razorpay keys when set, platform keys otherwise. */
 export async function POST(req: Request) {
-  const user = await requireUser();
+  const user = await requireUser(["super", "school", "parent"]);
   if (!user) return unauthorized();
   const scope = schoolScope(user);
   const body = await req.json().catch(() => null);
@@ -15,7 +15,11 @@ export async function POST(req: Request) {
         include: { school: { select: { id: true, razorpayKeyId: true, razorpayKeySecret: true } } },
       })
     : null;
-  if (!student || (scope && student.schoolId !== scope)) return unauthorized();
+  if (!student) return unauthorized();
+  // Parents may pay only for their own linked children.
+  if (user.role === "parent") {
+    if (student.parentId !== user.id) return unauthorized();
+  } else if (scope && student.schoolId !== scope) return unauthorized();
 
   const amount = Math.min(Number(body?.amount) || student.feeDue, student.feeDue);
   if (amount <= 0) return badRequest("No outstanding dues.");

@@ -1,24 +1,26 @@
 import { auth } from "@/auth";
 
+export type Role = "super" | "school" | "parent";
+
 export interface SessionUser {
   id: string;
   email: string;
   name: string;
-  role: "super" | "school";
+  role: Role;
   schoolId: string | null;
 }
 
-export async function requireUser(): Promise<SessionUser | null> {
+export async function requireUser(allowed: Role[] = ["super", "school"]): Promise<SessionUser | null> {
   const session = await auth();
   const u = session?.user as unknown as
     | { id?: string; email?: string; name?: string; role?: string; schoolId?: string | null }
     | undefined;
-  if (!u?.id || !u?.email || (u.role !== "super" && u.role !== "school")) return null;
+  if (!u?.id || !u?.email || !u.role || !(allowed as string[]).includes(u.role)) return null;
   return {
     id: u.id,
     email: u.email,
     name: u.name ?? "User",
-    role: u.role,
+    role: u.role as Role,
     schoolId: u.schoolId ?? null,
   };
 }

@@ -61,6 +61,15 @@ export const messageSchema = z.object({
 });
 export type MessageInput = z.infer<typeof messageSchema>;
 
+export const noticeSchema = z.object({
+  title: z.string().min(2).max(140),
+  body: z.string().max(2000).optional().default(""),
+  audience: z.enum(["All", "Parents", "Students", "Staff"]).default("Parents"),
+  schoolId: z.string().optional(),
+  sendWhatsapp: z.boolean().optional().default(false),
+});
+export type NoticeInput = z.infer<typeof noticeSchema>;
+
 export const STAGES_APPLICATION = ["Applied", "Screening", "Interview", "Demo", "Offer", "Hired", "Rejected"] as const;
 export const STAGES_LEAD = ["New", "Contacted", "Visit Scheduled", "Visited", "Admitted", "Lost"] as const;
 

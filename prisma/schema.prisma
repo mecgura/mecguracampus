@@ -14,9 +14,10 @@ model User {
   name         String?
   email        String   @unique
   passwordHash String
-  role         String   @default("school") // "super" | "school"
+  role         String   @default("school") // "super" | "school" | "parent"
   schoolId     String?
   school       School?  @relation(fields: [schoolId], references: [id])
+  children     Student[] @relation("ParentChildren")
   createdAt    DateTime @default(now())
 
   @@index([email])
@@ -51,6 +52,7 @@ model School {
   jobs     JobPosting[]
   leads    Lead[]
   devices  Device[]
+  notices  Notice[]
 
   @@index([status])
 }
@@ -66,6 +68,8 @@ model Student {
   phone      String   @default("")
   attendance Int      @default(100)
   deviceCode String   @default("") // biometric/PDS machine user ID
+  parentId   String?  // linked parent login (User.id)
+  parent     User?    @relation("ParentChildren", fields: [parentId], references: [id], onDelete: SetNull)
   createdAt  DateTime @default(now())
 
   receipts FeeReceipt[]
@@ -75,6 +79,7 @@ model Student {
   @@index([schoolId])
   @@index([name])
   @@index([deviceCode])
+  @@index([parentId])
 }
 
 model StaffMember {
@@ -178,6 +183,20 @@ model ExamResult {
   term      String  @default("Final")
 
   @@unique([studentId, subject, term])
+}
+
+// ---- Notices / Homework (school → parent app) ----
+model Notice {
+  id        String   @id @default(cuid())
+  schoolId  String?
+  school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  title     String
+  body      String   @default("")
+  audience  String   @default("All") // All|Parents|Students|Staff
+  createdAt DateTime @default(now())
+
+  @@index([schoolId])
+  @@index([createdAt])
 }
 
 model SiteSetting {

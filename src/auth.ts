@@ -24,7 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: email.toLowerCase().trim() },
           include: { school: { select: { id: true, name: true } } },
         });
-        if (!user || (user.role !== "super" && user.role !== "school")) return null;
+        if (!user || (user.role !== "super" && user.role !== "school" && user.role !== "parent")) return null;
         if (user.role === "school" && !user.schoolId) return null;
         const ok = await bcrypt.compare(password, user.passwordHash);
         if (!ok) return null;
