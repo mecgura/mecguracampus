@@ -36,6 +36,10 @@ model School {
   since        String   @default("2026")
   onboarding   String   @default("[]") // JSON-encoded completed setup steps
   sheetWebhook String   @default("") // Google Apps Script Web App URL for auto sheet sync
+  razorpayKeyId     String @default("") // institute-wise online fees (fallback: env)
+  razorpayKeySecret String @default("")
+  whatsappKey       String @default("") // institute-wise WhatsApp (fallback: env)
+  whatsappProvider  String @default("interakt")
   createdAt    DateTime @default(now())
 
   users    User[]

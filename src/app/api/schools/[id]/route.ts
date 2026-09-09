@@ -21,6 +21,12 @@ export async function PATCH(req: Request, { params }: Ctx) {
   if (typeof body.sheetWebhook === "string" && (user.role === "super" || isSelf)) {
     data.sheetWebhook = body.sheetWebhook.slice(0, 300);
   }
+  // Institute-wise integration keys — super admin or the school itself.
+  for (const k of ["razorpayKeyId", "razorpayKeySecret", "whatsappKey", "whatsappProvider"] as const) {
+    if (typeof body[k] === "string" && (user.role === "super" || isSelf)) {
+      data[k] = body[k].slice(0, 200);
+    }
+  }
   if (user.role === "super") {
     if (body.action === "toggle") {
       data.status = school.status === "Off" ? (school.due > 0 ? "Due" : school.trialDays > 0 ? "Trial" : "Paid") : "Off";
