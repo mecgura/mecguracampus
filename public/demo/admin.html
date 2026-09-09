@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Dashboard — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="dashboard">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>Platform Overview</h1><p>Revenue, schools, students and transport — live on one screen. Sections marked <b>NEW</b> are exclusive to MecguraCampus.</p></div>
+  </div>
+
+  <div class="grid4" id="stats"></div>
+
+  <div class="grid2 mt">
+    <div class="ai">
+      <h2>AI Collection Predictor <span class="bdg b">NEW — Exclusive</span></h2>
+      <p class="small">Predicts which parents are likely to delay fees — before it happens. This single feature justifies premium pricing.</p>
+      <div id="riskList" class="mt"></div>
+      <div class="why">Risk is computed from outstanding dues plus attendance patterns. Parents above 65% receive automatic reminders via the WhatsApp Center.</div>
+      <div class="mt"><a class="btn btn-d btn-sm" href="fees.html">Open Fees + AI</a></div>
+    </div>
+    <div class="card">
+      <h2>Parent Happiness Score</h2>
+      <div id="happy"></div>
+      <p class="small mt">A composite of app usage, on-time payments and message engagement. Schools below 80% receive an automatic alert — configured by us at setup.</p>
+      <div class="mt"><a class="btn btn-o btn-sm" href="reports.html">View Full AI Insights</a></div>
+    </div>
+  </div>
+
+  <div class="grid2 mt">
+    <div class="card">
+      <h2>Admissions Funnel (This Month)</h2>
+      <div id="funnel"></div>
+      <p class="small mt">Enquiry to visit to admission. This report is sent to every school, every month — the foundation of long-term retention.</p>
+    </div>
+    <div class="card soft">
+      <h2>Today's Action Items</h2>
+      <div id="tasks"></div>
+      <div class="mt">
+        <a class="btn btn-g btn-sm" href="onboarding.html">Onboard a New School</a>
+        <a class="btn btn-o btn-sm" href="messages.html">Send Reminder</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt">
+    <h2>Schools — Live Status</h2>
+    <div style="overflow-x:auto"><table class="tbl" id="schoolTbl"></table></div>
+    <div class="mt"><a class="btn btn-o btn-sm" href="schools.html">View All Schools</a></div>
+  </div>
+</main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+(function(){
+  var DB = MC.DB, totalStu = 0, totalDue = 0;
+  DB.schools.forEach(function(s){ totalStu += s.students; totalDue += (s.due||0); });
+  var collected = DB.fees.reduce(function(a,f){return a+f.amt;},0);
+  document.getElementById("stats").innerHTML =
+    stat("Total Schools", DB.schools.length, "3 active + 1 trial", "schools.html") +
+    stat("Total Students", totalStu.toLocaleString("en-IN"), "+214 this month", "students.html") +
+    stat("Fees Collected (Sep)", MC.inr(collected), "92% on time", "fees.html") +
+    stat("Buses Live", "3 / 4", "1 offline — PB-02-1190", "transport.html");
+  function stat(l,v,s,href){ return '<a class="card stat" href="'+href+'"><span>'+l+'</span><b>'+v+'</b><small>'+s+'</small></a>'; }
+
+  var risky = DB.students.filter(function(s){return s.due>0;})
+    .map(function(s){return {s:s, r:MC.riskOf(s)};}).sort(function(a,b){return b.r-a.r;}).slice(0,3);
+  document.getElementById("riskList").innerHTML = risky.map(function(x){
+    return '<div style="display:flex;gap:10px;align-items:center;background:#fff;border:1px solid #e9e2fb;border-radius:11px;padding:10px 13px;margin-top:9px">'
+      +'<div style="flex:1"><b style="font-size:13px">'+MC.esc(x.s.name)+'</b> <span class="small">• '+MC.esc(x.s.cls)+' • '+MC.inr(x.s.due)+' outstanding</span><div style="margin-top:6px">'+MC.riskBar(x.r)+'</div></div>'
+      +'<span class="bdg '+(x.r>65?"r":(x.r>35?"a":"g"))+'">'+x.r+'% risk</span></div>';
+  }).join("");
+
+  MC.donut(document.getElementById("happy"), 87, "87 — Excellent");
+  MC.bars(document.getElementById("funnel"), [
+    {k:"Enquiry", v:186, t:"186"},{k:"Visit", v:94, t:"94"},{k:"Admission", v:61, t:"61"},{k:"Fees Paid", v:55, t:"55"}
+  ]);
+  document.getElementById("tasks").innerHTML = [
+    "2 school plans expire tomorrow — <a href='billing.html'>send renewal reminders</a>",
+    "Bus PB-02-1190 is offline — <a href='transport.html'>contact the driver</a>",
+    "Class 10 results are pending publication — <a href='exams.html'>publish now</a>"
+  ].map(function(t){return '<div class="check"><span class="box"></span><span>'+t+'</span></div>';}).join("");
+  document.getElementById("schoolTbl").innerHTML = "<tr><th>School</th><th>Students</th><th>Plan</th><th>Status</th></tr>" +
+    DB.schools.map(function(s){
+      var b = s.status==="Paid"?'<span class="bdg g">Paid</span>':(s.status==="Due"?'<span class="bdg a">Rs. 1.8L Due</span>':'<span class="bdg gr">Trial — 6 days left</span>');
+      return "<tr><td><b>"+MC.esc(s.name)+"</b><br><span class='small'>"+MC.esc(s.city)+"</span></td><td>"+s.students+"</td><td>"+MC.esc(s.plan)+"</td><td>"+b+"</td></tr>";
+    }).join("");
+})();
+</script>
+</body>
+</html>

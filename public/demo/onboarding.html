@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New School Setup — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="onboarding">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>New School Onboarding — Live in 15 Minutes</h1><p>This wizard is your strongest sales asset. When a school sees how effortless setup is, the pricing conversation takes care of itself.</p></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <h2 id="obTitle">Onboarding: City Montessori, Jalandhar</h2>
+      <span class="bdg br" id="obPct">50% complete</span>
+    </div>
+    <div class="steps" id="obSteps"></div>
+    <div id="obList"></div>
+    <div class="toolbar mt">
+      <input id="obInput" placeholder="Add a custom step… (e.g. Configure bus routes)">
+      <button class="btn btn-o btn-sm" onclick="addStep()">+ Add Step</button>
+      <button class="btn btn-g btn-sm" onclick="nextStep()">Complete Next Step</button>
+      <button class="btn btn-d btn-sm" onclick="finishSetup()">Go Live</button>
+    </div>
+    <p class="small">Pressing Go Live triggers a welcome WhatsApp message and login SMS preview below — fully configured by our team.</p>
+    <div id="obDone" class="hide mt"></div>
+  </div>
+
+  <div class="grid3 mt">
+    <div class="card soft"><h2>What Setup Includes</h2><p class="small">Account creation, plan selection, class configuration, student import (Excel), fee heads, staff logins, bus routes with GPS, and WhatsApp integration — with a completion tick at every step.</p></div>
+    <div class="card soft"><h2>Time Required: 15 Minutes</h2><p class="small">Collect one Excel sheet from the school; the wizard handles the rest. A single executive can take 10 schools live per day.</p></div>
+    <div class="card soft"><h2>Recommended Pricing</h2><p class="small">Onboarding fee Rs. 4,999–9,999 plus Rs. 2,499/month SaaS. Schools pay happily — they perceive a premium, done-for-you service.</p></div>
+  </div>
+</main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+var ALL = ["Account created","Plan selected (Trial / Monthly / Annual)","Classes configured","Students imported (Excel)","Fee heads defined","Staff logins created","Bus routes + GPS linked","WhatsApp connected","Go-live + welcome message"];
+function cur(){ return MC.DB.onboard; }
+function render(){
+  var o = cur(), done = o.done;
+  document.getElementById("obTitle").textContent = "Onboarding: " + o.school;
+  var pct = Math.round(done.length/ALL.length*100);
+  document.getElementById("obPct").textContent = pct + "% complete";
+  document.getElementById("obSteps").innerHTML = ALL.map(function(s){return '<div class="'+(done.includes(s)?"done":"")+'"></div>';}).join("");
+  document.getElementById("obList").innerHTML = ALL.map(function(s){
+    var d = done.includes(s);
+    return '<div class="check '+(d?"done":"")+'"><span class="box">'+(d?"✓":"")+'</span><span>'+MC.esc(s)+'</span></div>';
+  }).join("");
+}
+function addStep(){ var v=document.getElementById("obInput").value.trim(); if(!v) return; ALL.push(v); document.getElementById("obInput").value=""; render(); }
+function nextStep(){ var o=cur(); var nxt=ALL.find(function(s){return !o.done.includes(s);}); if(!nxt){MC.toast("All steps complete. Press Go Live.");return;} o.done.push(nxt); MC.save(); render(); MC.toast("Completed: "+nxt); }
+function finishSetup(){
+  var o=cur();
+  document.getElementById("obDone").classList.remove("hide");
+  document.getElementById("obDone").innerHTML = '<div class="ai"><h2>'+MC.esc(o.school)+' is now LIVE.</h2><div class="bubble" style="margin-top:10px">Welcome to <b>MecguraCampus</b>. <b>'+MC.esc(o.school)+'</b> is now live.<br>Download the Parent App, pay fees online and track the school bus in real time.<br>— Team Mecgura</div><p class="small mt">This message has been sent to all parents of the school (demonstration). In production it is delivered via the WhatsApp API.</p></div>';
+  MC.toast("School is live.");
+  window.scrollTo(0,document.body.scrollHeight);
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Schools — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="schools">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>All Schools</h1><p>Every tenant's plan, payments and access. Non-payment → suspend in one click.</p></div>
+    <div class="mc-actions"><button class="btn btn-g" onclick="MC.openModal('mAdd')">+ Add School</button></div>
+  </div>
+  <div class="card">
+    <div class="toolbar">
+      <input id="q" placeholder="Search schools…" oninput="render()">
+      <select id="f" onchange="render()"><option value="">All statuses</option><option>Paid</option><option>Due</option><option>Trial</option><option>Off</option></select>
+    </div>
+    <div style="overflow-x:auto"><table class="tbl" id="tbl"></table></div>
+  </div>
+</main>
+</div>
+
+<div class="modal-bg" id="mAdd"><div class="modal">
+  <h3>New School (30 Seconds)</h3>
+  <div class="fld"><label>School name</label><input id="n" placeholder="e.g. Sant Isher Public School"></div>
+  <div class="frow"><div class="fld"><label>City</label><input id="c" placeholder="Ludhiana"></div>
+  <div class="fld"><label>Students (approx.)</label><input id="st" type="number" value="300"></div></div>
+  <div class="fld"><label>Plan</label><select id="p"><option>Trial — 7 days free</option><option>Monthly — Rs. 2,499</option><option>Annual — Rs. 24,999 (2 months free)</option></select></div>
+  <div style="display:flex;gap:8px"><button class="btn btn-g" onclick="addSchool()">Add &amp; Open Setup Wizard</button><button class="btn btn-o" onclick="MC.closeModal('mAdd')">Cancel</button></div>
+</div></div>
+
+<script src="assets/app.js"></script>
+<script>
+function badge(s){
+  if(s.status==="Paid") return '<span class="bdg g">Paid</span>';
+  if(s.status==="Due") return '<span class="bdg a">'+MC.inr(s.due)+' Due</span>';
+  if(s.status==="Off") return '<span class="bdg r">Suspended</span>';
+  return '<span class="bdg gr">Trial — '+s.trial+' days</span>';
+}
+function render(){
+  var q=(document.getElementById("q").value||"").toLowerCase(), f=document.getElementById("f").value;
+  var rows = MC.DB.schools.filter(function(s){
+    return (!q || (s.name+s.city).toLowerCase().includes(q)) && (!f || s.status===f);
+  }).map(function(s){
+    var toggle = s.status==="Off"
+      ? '<button class="btn btn-g btn-sm" onclick="toggleSch(\''+s.id+'\')">Activate</button>'
+      : '<button class="btn btn-o btn-sm" onclick="toggleSch(\''+s.id+'\')">Suspend</button>';
+    return "<tr><td><b>"+MC.esc(s.name)+"</b><br><span class='small'>"+MC.esc(s.city)+" • since "+MC.esc(s.since)+"</span></td>"
+      +"<td>"+s.students+"</td><td>"+MC.esc(s.plan)+"</td><td>"+badge(s)+"</td>"
+      +"<td><a class='btn btn-o btn-sm' href='onboarding.html'>Setup</a> "+toggle+"</td></tr>";
+  });
+  document.getElementById("tbl").innerHTML = "<tr><th>School</th><th>Students</th><th>Plan</th><th>Status</th><th>Actions</th></tr>"+(rows.join("")||"<tr><td colspan=5 class='small'>No schools found.</td></tr>");
+}
+function addSchool(){
+  var n=document.getElementById("n").value.trim(); if(!n){MC.toast("Please enter the school name first.");return;}
+  var p=document.getElementById("p").value;
+  var st = p.indexOf("Trial")===0?"Trial":"Paid";
+  MC.DB.schools.push({id:MC.uid("sch"), name:n, city:document.getElementById("c").value||"—", students:+document.getElementById("st").value||0, plan:p, status:st, trial:st==="Trial"?7:0, due:0, since:"2026"});
+  MC.DB.onboard={step:0,school:n,done:["Account created"]}; MC.save(); MC.closeModal("mAdd"); render();
+  MC.toast("School added. Open the Setup Wizard to go live.");
+}
+function toggleSch(id){
+  var s=MC.DB.schools.find(function(x){return x.id===id;});
+  if(s.status==="Off"){s.status="Paid";MC.toast(s.name+" has been activated.");} else {s.status="Off";MC.toast(s.name+" has been suspended (payment pending).");}
+  MC.save(); render();
+}
+render();
+</script>
+</body>
+</html>

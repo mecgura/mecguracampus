@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp Center — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="messages">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>WhatsApp Center <span class="bdg b">NEW</span></h1><p>Punjabi, Hindi or English — every parent in their own language. This screen alone closes deals with rural and urban schools alike.</p></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h2>Template + Live Preview</h2>
+      <div class="fld"><label>Select message</label><select id="tpl" onchange="preview()"><option value="fee">Fee Reminder</option><option value="att">Low Attendance Alert</option><option value="res">Result Published</option><option value="bus">Bus Delay Information</option><option value="wel">Welcome (New Admission)</option></select></div>
+      <div class="lang-tabs"><button class="on" data-l="Punjabi" onclick="lang(this)">Punjabi</button><button data-l="Hindi" onclick="lang(this)">Hindi</button><button data-l="English" onclick="lang(this)">English</button></div>
+      <div class="phone"><div class="ph">MecguraCampus • School Updates</div><div class="pb"><div class="bubble" id="prev"></div><div class="small" style="text-align:right">10:02 AM</div></div></div>
+      <div class="fld mt"><label>Recipients (demonstration)</label><select id="to"><option>Class 10-A Parents (86)</option><option>Fee Defaulters (5)</option><option>Bus Route 1 Parents (42)</option><option>All Parents (2,960)</option></select></div>
+      <button class="btn btn-g" onclick="send()">Send Now</button>
+    </div>
+    <div class="card soft">
+      <h2>Delivery Log</h2>
+      <div id="log"></div>
+    </div>
+  </div>
+</main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+var LANG="Punjabi";
+var T={
+ fee:{Punjabi:"Sat Sri Akal. September fees of <b>Arshdeep Singh (10-A)</b> — <b>Rs. 4,500</b> — is pending. Kindly pay by tomorrow: mecgura.pay/4521. — School Office",Hindi:"नमस्ते। <b>Arshdeep Singh (10-A)</b> की सितंबर फीस <b>₹4,500</b> बाकी है। कृपया कल तक भर दें: mecgura.pay/4521। — स्कूल कार्यालय",English:"Hello. September fees of <b>Arshdeep Singh (10-A)</b> — <b>Rs. 4,500</b> — is pending. Please pay by tomorrow: mecgura.pay/4521. — School Office"},
+ att:{Punjabi:"Attendance of <b>Gurpreet Singh</b> has dropped to <b>71%</b>. Please ensure daily attendance — together we will improve it.",Hindi:"<b>Gurpreet Singh</b> की हाज़िरी <b>71%</b> रह गई है। कृपया रोज़ स्कूल भेजें।",English:"Attendance of <b>Gurpreet Singh</b> has dropped to <b>71%</b>. Please ensure daily attendance."},
+ res:{Punjabi:"<b>Class 10-A results</b> are published. View them in the Parent App — 94% pass, topper Arshdeep Singh with 86%.",Hindi:"<b>Class 10-A का परिणाम</b> जारी हो गया है। Parent App में देखें — 94% उत्तीर्ण।",English:"<b>Class 10-A results</b> are published. View them in the Parent App — 94% pass rate."},
+ bus:{Punjabi:"<b>Bus PB-10-4521</b> is running 10 minutes late due to traffic. Your child is safe — track the live location in the app.",Hindi:"<b>Bus PB-10-4521</b> ट्रैफिक के कारण 10 मिनट लेट है। आपका बच्चा सुरक्षित है।",English:"<b>Bus PB-10-4521</b> is running 10 minutes late due to traffic. Your child is safe — track it live in the app."},
+ wel:{Punjabi:"Welcome to <b>City Montessori</b>. Admission confirmed. Please download the Parent App — the ID card is available inside.",Hindi:"<b>City Montessori</b> में स्वागत है। प्रवेश निश्चित। कृपया Parent App डाउनलोड करें।",English:"Welcome to <b>City Montessori</b>. Admission confirmed. Please download the Parent App — the ID card is available inside."}};
+function lang(b){LANG=b.dataset.l;document.querySelectorAll(".lang-tabs button").forEach(function(x){x.classList.remove("on");});b.classList.add("on");preview();}
+function preview(){document.getElementById("prev").innerHTML=T[document.getElementById("tpl").value][LANG];}
+function send(){var t=document.getElementById("tpl").selectedOptions[0].text;
+  MC.DB.msgs.unshift({id:MC.uid("m"),to:document.getElementById("to").value,tpl:t,lang:LANG,date:"2026-09-09",status:"Sent"});MC.save();log();MC.toast("Message sent ("+LANG+").");}
+function log(){document.getElementById("log").innerHTML=MC.DB.msgs.slice(0,8).map(function(m){return '<div class="check"><span class="box">✓</span><span><b>'+MC.esc(m.to)+'</b> — '+MC.esc(m.tpl)+' <span class="bdg br">'+MC.esc(m.lang)+'</span><br><span class="small">'+MC.esc(m.date)+' • '+MC.esc(m.status)+'</span></span></div>';}).join("");}
+preview();log();
+</script>
+</body>
+</html>

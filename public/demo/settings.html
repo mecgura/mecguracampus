@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="settings">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>Settings</h1><p>Configure once — branding, session and WhatsApp — and it runs all year.</p></div>
+    <div class="mc-actions"><button class="btn btn-g" onclick="save()">Save All</button></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h2>Branding (What the School App Displays)</h2>
+      <div class="fld"><label>System name</label><input id="s1" value="MecguraCampus"></div>
+      <div class="frow"><div class="fld"><label>Academic session</label><select id="s2"><option>2026-27</option><option>2025-26</option></select></div>
+      <div class="fld"><label>Default language</label><select id="s3"><option>Punjabi + English</option><option>Hindi + English</option><option>English only</option></select></div></div>
+    </div>
+    <div class="card"><h2>WhatsApp API (For Live Messaging)</h2>
+      <div class="fld"><label>Provider</label><select id="s4"><option>Interakt (recommended)</option><option>Gupshup</option><option>Twilio</option></select></div>
+      <div class="fld"><label>API key</label><input id="s5" placeholder="Paste your live key here"></div>
+      <p class="small">Demonstration mode is active. Messages go live the moment a key is added — our team configures this for every school.</p>
+    </div>
+  </div>
+  <div class="card mt"><h2>Reception Follow-up Script (Per the Reports Recommendation)</h2>
+    <div class="bubble">Good morning. I am calling from [School Name]. You visited us yesterday — please confirm admission within two days, as seats are limited. Fees can be paid in instalments. Shall I send you the admission form?</div>
+    <p class="small mt">Install this script at every school reception. It lifts visit-to-admission conversion from 33% toward 50% — small configurations like this are what justify your price.</p></div>
+  <div class="card mt soft"><h2>Reset Demonstration Data</h2><p class="small">Clear all demo entries before presenting to a school.</p><div class="mt"><button class="btn btn-danger btn-sm" onclick="if(confirm('Reset all demonstration data?')){localStorage.removeItem('mc_db_v1');location.reload();}">Reset Demo Data</button> <a class="btn btn-o btn-sm" href="index.html">Back to Website</a></div></div>
+</main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+["s1","s2","s3","s4","s5"].forEach(function(id){ var v=localStorage.getItem("mc_"+id); if(v) document.getElementById(id).value=v; });
+function save(){ ["s1","s2","s3","s4","s5"].forEach(function(id){ localStorage.setItem("mc_"+id, document.getElementById(id).value); }); MC.toast("All settings saved."); }
+</script>
+</body>
+</html>

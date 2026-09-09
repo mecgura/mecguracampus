@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transport GPS — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="transport">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>Transport — Live GPS</h1><p>Parents track the bus from home. Schools commit the moment they see this screen.</p></div>
+    <div class="mc-actions"><button class="btn btn-g" onclick="move()">Run Live Demo</button></div>
+  </div>
+  <div class="grid2" id="buses"></div>
+  <div class="card mt">
+    <h2>Safety &amp; Speed Alerts</h2>
+    <div id="alerts"></div>
+  </div>
+</main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+function render(){
+  document.getElementById("buses").innerHTML = MC.DB.buses.map(function(b){
+    var live = b.status==="Live";
+    return '<div class="card'+(live?"":" soft")+'"><div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">'+MC.esc(b.no)+'</h2>'
+    +(live?'<span class="bdg g">● LIVE</span>':'<span class="bdg r">○ OFFLINE</span>')+'</div>'
+    +'<p class="small mt">'+MC.esc(b.route)+' • '+b.kids+' students on board</p>'
+    +'<div class="route"><div class="road"></div>'
+    +'<div class="stop" style="left:12px">H</div><div class="stop" style="left:45%">S</div><div class="stop" style="right:12px">Sc</div>'
+    +'<div class="busdot" style="left:calc('+(live?b.pos:80)+'% )">'+(live?"🚌":"!")+'</div></div>'
+    +'<p class="small mt">'+(live?("Approx. "+(100-b.pos)*120+" m from school • 28 km/h, within limit"):"Last signal 25 minutes ago — please call the driver.")+'</p></div>';
+  }).join("");
+  document.getElementById("alerts").innerHTML =
+    '<div class="check"><span class="box"></span><span><b>PB-02-1190 OFFLINE</b> — no signal for 25 minutes. Driver: Balwinder Singh. <button class="btn btn-g btn-sm" onclick="MC.toast(\'Calling driver…\')">Call Driver</button></span></div>'
+    +'<div class="check done"><span class="box">✓</span><span>All other buses are within speed limits and every child is accounted for. Parents are watching live.</span></div>';
+}
+function move(){ var moved=false;
+  MC.DB.buses.forEach(function(b){ if(b.status==="Live"&&b.pos<92){b.pos+=8;moved=true;} });
+  MC.save(); render(); MC.toast(moved?"Buses are moving…":"All buses have reached the school.");
+}
+render(); setInterval(function(){ var any=false; MC.DB.buses.forEach(function(b){ if(b.status==="Live"&&b.pos<92){b.pos+=1;any=true;} }); if(any){MC.save();render();} },4000);
+</script>
+</body>
+</html>

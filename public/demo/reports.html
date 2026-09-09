@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports & AI Insights — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="reports">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>Reports &amp; AI Insights</h1><p>Send this report to every school, every month — no school will ever want to leave.</p></div>
+    <div class="mc-actions"><button class="btn btn-o" onclick="window.print()">Print Monthly Report</button></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h2>Fee Collection (Apr → Sep)</h2><div id="c1"></div></div>
+    <div class="card"><h2>Attendance % (Top Classes)</h2><div id="c2"></div></div>
+  </div>
+  <div class="ai mt">
+    <h2>AI Monthly Recommendations (Auto-Generated)</h2>
+    <div id="tips" class="mt"></div>
+  </div>
+  <div class="card mt print-area">
+    <h2>School Health Card</h2>
+    <div style="overflow-x:auto"><table class="tbl" id="tbl"></table></div>
+  </div>
+</main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+MC.bars(document.getElementById("c1"),[{k:"Apr",v:14.2,t:"Rs. 14.2L"},{k:"May",v:15.8,t:"Rs. 15.8L"},{k:"Jun",v:9.4,t:"Rs. 9.4L"},{k:"Jul",v:16.9,t:"Rs. 16.9L"},{k:"Aug",v:17.5,t:"Rs. 17.5L"},{k:"Sep",v:18.2,t:"Rs. 18.2L"}]);
+MC.bars(document.getElementById("c2"),[{k:"3-B",v:98,t:"98%"},{k:"10-A",v:94,t:"94%"},{k:"5-A",v:88,t:"88%"},{k:"12-S",v:84,t:"84%"},{k:"8-B",v:71,t:"71%"},{k:"9-C",v:64,t:"64%"}],"#3b82f6");
+document.getElementById("tips").innerHTML=[
+  "<b>Classes 9-C (64%) and 8-B (71%)</b> are below safe attendance levels. Schedule a class-teacher meeting this week.",
+  "<b>Rs. 2.9L is outstanding</b> across 5 parents. The model predicts Harman Singh's family will pay first if contacted with a Punjabi voice note.",
+  "<b>Parent Happiness is at 87%</b> — up 4 points from last month. The live bus-tracking feature drove the improvement.",
+  "<b>Admission conversion is 33%</b> from visit to admission, which is below potential. Deploy the reception follow-up script in Settings."
+].map(function(t){return '<div class="check done"><span class="box">✓</span><span>'+t+'</span></div>';}).join("");
+document.getElementById("tbl").innerHTML="<tr><th>School</th><th>Students</th><th>Fee Health</th><th>Attendance</th><th>Grade</th></tr>"+
+ [["Guru Nanak Public School",1240,"96% on time","93%","A+"],["Akal Academy",860,"71% on time","82%","B"],["Dashmesh Model School",540,"89% on time","88%","A"],["City Montessori (Trial)",320,"—","95%","A"]].map(function(r){
+  var g=r[4]==="A+"?'<span class="bdg g">A+</span>':(r[4]==="A"?'<span class="bdg g">A</span>':'<span class="bdg a">B</span>');
+  return "<tr><td><b>"+r[0]+"</b></td><td>"+r[1]+"</td><td>"+r[2]+"</td><td>"+r[3]+"</td><td>"+g+"</td></tr>";}).join("");
+</script>
+</body>
+</html>

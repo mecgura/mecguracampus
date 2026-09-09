@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MecguraCampus — One Platform. Every School.</title>
+<meta name="description" content="MecguraCampusOS — Multi-tenant SaaS school ERP. 6 connected apps, 300+ modules, AI fee prediction and trilingual parent communication.">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background:#fff; color:#0C160D; }
+  .wrap { max-width:1100px; margin:0 auto; padding:0 20px; }
+  header { border-bottom:1px solid #DFE8DF; padding:14px 0; background:#F7FAF7; }
+  header .wrap { display:flex; align-items:center; justify-content:space-between; }
+  .logo { display:flex; align-items:center; gap:10px; text-decoration:none; color:#0C160D; }
+  .logo-mark { width:40px; height:40px; background:#78ce57; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:20px; color:#062026; }
+  .logo b { font-size:16px; } .logo small { display:block; font-size:11px; color:#5C6E5F; font-weight:400; }
+  .btn { display:inline-block; padding:12px 26px; border-radius:10px; text-decoration:none; font-weight:700; font-size:14px; }
+  .btn-green { background:#78ce57; color:#062026; } .btn-green:hover { background:#57b53e; }
+  .btn-dark { background:#0C160D; color:#fff; } .btn-outline { border:1px solid #CBD6CB; color:#0C160D; background:#fff; }
+  .hero { text-align:center; padding:50px 20px 30px; }
+  .pill { display:inline-block; border:1px solid #57b53e; background:#effbea; color:#2a6122; font-size:12px; font-weight:700; padding:6px 16px; border-radius:100px; }
+  .hero h1 { font-size:42px; margin:16px 0 10px; } .hero h1 span { color:#3f9430; }
+  .hero p { color:#4C5C4F; max-width:660px; margin:0 auto; line-height:1.7; font-size:15px; }
+  .hero-btns { margin-top:22px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:760px; margin:28px auto 0; text-align:left; }
+  .stat { border:1px solid #DFE8DF; background:#F7FAF7; border-radius:14px; padding:16px; }
+  .stat b { display:block; margin-top:8px; font-size:14px; } .stat small { color:#5C6E5F; font-size:12px; }
+  .section { padding:34px 0; } .section h2 { text-align:center; font-size:26px; } .section .sub { text-align:center; color:#5C6E5F; font-size:14px; margin-top:6px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px; }
+  .card { border:1px solid #DFE8DF; border-radius:16px; padding:22px; }
+  .card.green { background:#effbea; border-color:#57b53e; } .card.grey { background:#F2F7F2; } .card.white { background:#fff; }
+  .card h3 { margin:10px 0 8px; font-size:16px; } .card p { font-size:13px; color:#2B3D2E; line-height:1.65; }
+  .icon { width:44px; height:44px; border-radius:12px; background:#78ce5730; display:flex; align-items:center; justify-content:center; font-size:22px; }
+  .grid6 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px; }
+  .app { border:1px solid #DFE8DF; border-radius:16px; padding:18px; background:#fff; }
+  .app:hover { border-color:#57b53e; }
+  .app-top { display:flex; justify-content:space-between; align-items:center; }
+  .tag { background:#F2F7F2; font-size:11px; font-weight:700; color:#2a6122; padding:4px 12px; border-radius:100px; }
+  .app h3 { margin:12px 0 8px; font-size:15px; }
+  .app ul { list-style:none; } .app li { font-size:12px; color:#42553F; padding:3px 0; }
+  .app li::before { content:"✓ "; color:#10b981; font-weight:700; }
+  .diff { background:#0C160D; color:#fff; border-radius:18px; padding:34px; margin-top:26px; }
+  .diff h2 { color:#fff; } .diff .sub { color:#ffffffb0; }
+  .diff-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:20px; text-align:left; }
+  .diff-item { background:#ffffff10; border:1px solid #ffffff22; border-radius:14px; padding:18px; }
+  .diff-item b { display:block; font-size:14px; margin-bottom:6px; color:#78ce57; }
+  .diff-item p { font-size:12.5px; color:#ffffffcc; line-height:1.65; }
+  .cta { margin:30px 0 50px; border:1px solid #57b53e; background:linear-gradient(#effbea,#F2F7F2); border-radius:18px; padding:34px; text-align:center; }
+  .cta p { font-size:18px; font-weight:800; } .cta .btn { margin-top:16px; }
+  footer { border-top:1px solid #DFE8DF; padding:18px; text-align:center; color:#5C6E5F; font-size:12px; }
+  @media(max-width:760px){ .hero h1{font-size:30px;} .grid3,.grid6,.stats,.diff-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="logo" href="index.html"><span class="logo-mark">M</span><span><b>MecguraCampus</b><small>Multi-School ERP • SaaS</small></span></a>
+    <a class="btn btn-green" href="admin.html">View Live Demo</a>
+  </div>
+</header>
+
+<div class="hero">
+  <span class="pill">MecguraCampusOS • Multi-Tenant SaaS</span>
+  <h1>One Platform. <span>Every School.</span></h1>
+  <p>Admissions, fees, attendance, examinations, transport GPS, payroll and parent communication — every school operation in one system. You own the platform; schools subscribe monthly or yearly.</p>
+  <div class="hero-btns">
+    <a class="btn btn-green" href="admin.html">View Super Admin Demo</a>
+    <a class="btn btn-outline" href="#apps">Explore the 6 Apps</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>300+ Modules</b><small>Fees, exams, HR, library, LMS</small></div>
+    <div class="stat"><b>6 Connected Apps</b><small>Parent, staff, driver + web</small></div>
+    <div class="stat"><b>Recurring SaaS Revenue</b><small>Monthly / yearly per school</small></div>
+  </div>
+</div>
+
+<div class="wrap section">
+  <h2>How It Works — 3 Levels</h2>
+  <p class="sub">A complete multi-tenant SaaS model</p>
+  <div class="grid3">
+    <div class="card green"><div class="icon">👑</div><h3>Level 1 — You (Super Admin)</h3><p>The owner of MecguraCampus. Add schools, assign subscription plans, track payments, and activate or suspend any tenant in one click.</p></div>
+    <div class="card grey"><div class="icon">🏫</div><h3>Level 2 — School (Tenant)</h3><p>Each school gets an isolated login and database. No school can ever see another school's data. One codebase, hundreds of schools.</p></div>
+    <div class="card white"><div class="icon">📊</div><h3>Level 3 — Users</h3><p>Principal, teacher, accountant, parent, student and driver — role-based access, so everyone sees exactly what they need.</p></div>
+  </div>
+</div>
+
+<div class="wrap section" id="apps">
+  <h2>6 Connected Applications</h2>
+  <p class="sub">One backend, six front-ends</p>
+  <div class="grid6">
+    <div class="app"><div class="app-top"><div class="icon">📱</div><span class="tag">12 Modules</span></div><h3>Parent &amp; Student App</h3><ul><li>Online fee payment</li><li>Homework &amp; notices</li><li>Results &amp; report cards</li><li>Live bus tracking</li></ul></div>
+    <div class="app"><div class="app-top"><div class="icon">👨‍🏫</div><span class="tag">16 Modules</span></div><h3>Staff &amp; Admin App</h3><ul><li>Digital attendance</li><li>Timetable &amp; planner</li><li>Salary slips</li><li>Leave management</li></ul></div>
+    <div class="app"><div class="app-top"><div class="icon">🚌</div><span class="tag">GPS Tracking</span></div><h3>Driver App — Live GPS</h3><ul><li>Route start / end</li><li>Trip history</li><li>Speed limit alerts</li><li>Parent live view</li></ul></div>
+    <div class="app"><div class="app-top"><div class="icon">👆</div><span class="tag">Windows Agent</span></div><h3>Biometric Agent</h3><ul><li>Fingerprint device sync</li><li>Automatic attendance</li><li>Staff + student support</li></ul></div>
+    <div class="app"><div class="app-top"><div class="icon">🌐</div><span class="tag">Web Dashboard</span></div><h3>School Portal</h3><ul><li>Admissions &amp; records</li><li>Fee management</li><li>Examinations</li><li>Analytical reports</li></ul></div>
+    <div class="app"><div class="app-top"><div class="icon">👑</div><span class="tag">Platform Owner</span></div><h3>Super Admin</h3><ul><li>Unlimited schools</li><li>Plans &amp; billing</li><li>Access control</li></ul></div>
+  </div>
+
+  <div class="diff">
+    <h2>What Makes MecguraCampus Different</h2>
+    <p class="sub">Exclusive capabilities no competitor offers in one package</p>
+    <div class="diff-grid">
+      <div class="diff-item"><b>AI Fee Predictor</b><p>Predicts which parents are likely to delay payment — before it happens. Schools recover lakhs in pending fees.</p></div>
+      <div class="diff-item"><b>15-Minute School Onboarding</b><p>A guided setup wizard takes any school live in 15 minutes. We configure everything — the school simply starts using it.</p></div>
+      <div class="diff-item"><b>Trilingual Parent Communication</b><p>Every WhatsApp message in Punjabi, Hindi or English — automatically. Parent engagement rises within weeks.</p></div>
+      <div class="diff-item"><b>Parent Happiness Score</b><p>A single monthly score per school, built from usage, payments and engagement. Retention becomes measurable.</p></div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <p>Next step: explore the live Super Admin dashboard</p>
+    <a class="btn btn-dark" href="admin.html">Open Super Admin Demo</a>
+  </div>
+</div>
+
+<footer>MecguraCampusOS • Professional School ERP Platform • Product Demonstration</footer>
+</body>
+</html>

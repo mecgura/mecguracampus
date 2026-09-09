@@ -1,0 +1,239 @@
+// MecguraCampusOS — database schema.
+// String IDs + String statuses keep SQLite (local) and PostgreSQL (prod) compatible.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  role         String   @default("school") // "super" | "school"
+  schoolId     String?
+  school       School?  @relation(fields: [schoolId], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@index([email])
+  @@index([schoolId])
+}
+
+model School {
+  id         String   @id @default(cuid())
+  name       String
+  city       String   @default("")
+  kind       String   @default("School") // School|Tuition Centre|Coaching Institute|College|Playway|Other
+  students   Int      @default(0) // approx headcount shown on cards
+  plan       String   @default("Trial")
+  status     String   @default("Trial") // "Trial" | "Paid" | "Due" | "Off"
+  trialDays  Int      @default(7)
+  due        Int      @default(0) // SaaS dues in rupees
+  since      String   @default("2026")
+  onboarding String   @default("[]") // JSON-encoded completed setup steps
+  sheetWebhook String @default("") // Google Apps Script Web App URL for auto sheet sync
+  createdAt  DateTime @default(now())
+
+  users    User[]
+  pupils   Student[]
+  staff    StaffMember[]
+  buses    Bus[]
+  receipts FeeReceipt[]
+  messages MessageLog[]
+  jobs     JobPosting[]
+  leads    Lead[]
+  devices  Device[]
+
+  @@index([status])
+}
+
+model Student {
+  id         String   @id @default(cuid())
+  name       String
+  class      String   @default("")
+  schoolId   String
+  school     School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  feeMonthly Int      @default(0)
+  feeDue     Int      @default(0)
+  phone      String   @default("")
+  attendance Int      @default(100)
+  deviceCode String   @default("") // biometric/PDS machine user ID
+  createdAt  DateTime @default(now())
+
+  receipts FeeReceipt[]
+  presence AttendanceRecord[]
+  exams    ExamResult[]
+
+  @@index([schoolId])
+  @@index([name])
+  @@index([deviceCode])
+}
+
+model StaffMember {
+  id         String @id @default(cuid())
+  name       String
+  role       String @default("")
+  schoolId   String
+  school     School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  salary     Int    @default(0)
+  status     String @default("Pending") // "Pending" | "Paid"
+  deviceCode String @default("") // biometric/PDS machine user ID
+
+  @@index([schoolId])
+  @@index([deviceCode])
+}
+
+model Bus {
+  id        String @id @default(cuid())
+  number    String
+  route     String @default("")
+  kids      Int    @default(0)
+  status    String @default("Live") // "Live" | "Offline"
+  position  Int    @default(20)
+  driverKey String @default("") // secret for the driver app
+  schoolId  String?
+  school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  pings     BusPing[]
+}
+
+model BusPing {
+  id        String   @id @default(cuid())
+  busId     String
+  bus       Bus      @relation(fields: [busId], references: [id], onDelete: Cascade)
+  lat       Float?
+  lng       Float?
+  speed     Int      @default(0)
+  position  Int      @default(0) // 0-100 along the route
+  at        DateTime @default(now())
+
+  @@index([busId])
+  @@index([at])
+}
+
+model Device {
+  id          String    @id @default(cuid())
+  name        String
+  type        String    @default("biometric") // "biometric" | "gps"
+  schoolId    String?
+  school      School?   @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  apiKey      String    @unique
+  lastSeen    DateTime?
+  lastSummary String    @default("")
+  createdAt   DateTime  @default(now())
+}
+
+model FeeReceipt {
+  id          String   @id @default(cuid())
+  studentId   String?
+  student     Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  studentName String
+  schoolId    String?
+  school      School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  schoolName  String   @default("")
+  amount      Int
+  date        DateTime @default(now())
+  mode        String   @default("UPI")
+
+  @@index([schoolId])
+}
+
+model MessageLog {
+  id        String   @id @default(cuid())
+  recipient String
+  template  String
+  language  String   @default("English")
+  status    String   @default("Sent")
+  schoolId  String?
+  school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([schoolId])
+}
+
+model AttendanceRecord {
+  id        String  @id @default(cuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  date      String // YYYY-MM-DD
+  present   Boolean @default(true)
+
+  @@unique([studentId, date])
+  @@index([date])
+}
+
+model ExamResult {
+  id        String  @id @default(cuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject   String
+  marks     Int     @default(0)
+  term      String  @default("Final")
+
+  @@unique([studentId, subject, term])
+}
+
+model SiteSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @default("")
+
+  @@index([key])
+}
+
+// ---- Teacher Hiring (ATS) ----
+model JobPosting {
+  id        String   @id @default(cuid())
+  title     String
+  schoolId  String?
+  school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  jobType   String   @default("Teacher")
+  salary    String   @default("")
+  status    String   @default("Open") // "Open" | "Closed"
+  createdAt DateTime @default(now())
+
+  applications Application[]
+
+  @@index([schoolId])
+  @@index([status])
+}
+
+model Application {
+  id          String     @id @default(cuid())
+  jobId       String
+  job         JobPosting @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  name        String
+  phone       String     @default("")
+  qualification String   @default("")
+  experience  String     @default("")
+  stage       String     @default("Applied") // Applied|Screening|Interview|Demo|Offer|Hired|Rejected
+  score       Int        @default(0)
+  notes       String     @default("")
+  createdAt   DateTime   @default(now())
+
+  @@index([jobId])
+  @@index([stage])
+}
+
+// ---- Admissions CRM ----
+model Lead {
+  id         String   @id @default(cuid())
+  parentName String
+  phone      String   @default("")
+  childName  String   @default("")
+  childClass String   @default("")
+  schoolId   String?
+  school     School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  source     String   @default("Walk-in")
+  stage      String   @default("New") // New|Contacted|Visit Scheduled|Visited|Admitted|Lost
+  followUp   String   @default("") // YYYY-MM-DD
+  notes      String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@index([schoolId])
+  @@index([stage])
+  @@index([followUp])
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="attendance">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>Attendance — Today, 9 September 2026</h1><p>Biometric and app records sync automatically. Below 75% → the parent is alerted without staff lifting a finger.</p></div>
+    <div class="mc-actions"><button class="btn btn-o" onclick="MC.toast('Biometric device connected. Records synced.')">Sync Biometric</button><button class="btn btn-g" onclick="saveAtt()">Save Attendance</button></div>
+  </div>
+  <div class="grid4" id="stats"></div>
+  <div class="card mt">
+    <h2>Class 10-A — Guru Nanak Public School <span class="small">(tick = present)</span></h2>
+    <div id="list"></div>
+  </div>
+  <div class="card mt soft">
+    <h2>Low-Attendance Alerts (Automatic Parent Messages)</h2>
+    <div id="alerts"></div>
+  </div>
+</main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+var present = {};
+MC.DB.students.forEach(function(s){ present[s.id] = s.att >= 75; });
+function render(){
+  var total=MC.DB.students.length, p=Object.keys(present).filter(function(k){return present[k];}).length;
+  document.getElementById("stats").innerHTML =
+    '<div class="card stat"><span>Present today</span><b>'+p+' / '+total+'</b><small>'+Math.round(p/total*100)+'% present</small></div>'
+    +'<div class="card stat"><span>Absent</span><b>'+(total-p)+'</b><small>parents notified by SMS</small></div>'
+    +'<div class="card stat"><span>Biometric sync</span><b>Active</b><small>synced 2 minutes ago</small></div>'
+    +'<div class="card stat"><span>Alerts triggered</span><b>'+MC.DB.students.filter(function(s){return s.att<75;}).length+'</b><small>low attendance</small></div>';
+  document.getElementById("list").innerHTML = MC.DB.students.map(function(s){
+    var on=present[s.id];
+    return '<div class="check '+(on?"done":"")+'" onclick="tog(\''+s.id+'\')" style="cursor:pointer"><span class="box">'+(on?"✓":"")+'</span><span><b>'+MC.esc(s.name)+'</b> <span class="small">• '+MC.esc(s.cls)+' • annual average '+s.att+'%</span></span></div>';
+  }).join("");
+  var low=MC.DB.students.filter(function(s){return s.att<75;});
+  document.getElementById("alerts").innerHTML = low.length? low.map(function(s){
+    return '<div class="check"><span class="box"></span><span><b>'+MC.esc(s.name)+'</b> — '+s.att+'% attendance. Parent WhatsApp alert is ready. <button class="btn btn-g btn-sm" onclick="alert1(\''+s.id+'\')">Send Alert</button></span></div>';
+  }).join("") : '<p class="small">All students are above 75% — no alerts required.</p>';
+}
+function tog(id){ present[id]=!present[id]; render(); }
+function saveAtt(){ var p=Object.keys(present).filter(function(k){return present[k];}).length; MC.toast("Attendance saved. "+p+" present; absentees notified by SMS."); }
+function alert1(id){ var s=MC.DB.students.find(function(x){return x.id===id;});
+  MC.DB.msgs.push({id:MC.uid("m"),to:s.name+" (Parent)",tpl:"Low Attendance Alert",lang:"Punjabi",date:"2026-09-09",status:"Sent"}); MC.save(); MC.toast("Alert sent to parent."); }
+render();
+</script>
+</body>
+</html>

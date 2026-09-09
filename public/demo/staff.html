@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff & Payroll — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="staff">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>Staff &amp; Payroll</h1><p>Salaries, leave and logins — from the principal to the driver.</p></div>
+    <div class="mc-actions"><button class="btn btn-g" onclick="payAll()">Release All Salaries</button></div>
+  </div>
+  <div class="grid4" id="stats"></div>
+  <div class="card mt">
+    <div class="toolbar"><input id="q" placeholder="Search staff…" oninput="render()"></div>
+    <div style="overflow-x:auto"><table class="tbl" id="tbl"></table></div>
+  </div>
+</main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+function render(){
+  var q=(document.getElementById("q").value||"").toLowerCase();
+  var total=MC.DB.staff.reduce(function(a,s){return a+s.salary;},0);
+  var pend=MC.DB.staff.filter(function(s){return s.status==="Pending";});
+  document.getElementById("stats").innerHTML =
+    '<div class="card stat"><span>Total staff</span><b>'+MC.DB.staff.length+'</b><small>across 4 schools</small></div>'
+    +'<div class="card stat"><span>Monthly payroll</span><b>'+MC.inr(total)+'</b><small>combined salaries</small></div>'
+    +'<div class="card stat"><span>Pending</span><b>'+pend.length+'</b><small>'+MC.inr(pend.reduce(function(a,s){return a+s.salary;},0))+' outstanding</small></div>'
+    +'<div class="card stat"><span>Paid</span><b>'+(MC.DB.staff.length-pend.length)+'</b><small>slips sent on WhatsApp</small></div>';
+  document.getElementById("tbl").innerHTML="<tr><th>Staff Member</th><th>School</th><th>Salary</th><th>Status</th><th></th></tr>"+
+    MC.DB.staff.filter(function(s){return !q||(s.name+s.role).toLowerCase().includes(q);}).map(function(s){
+      var b=s.status==="Paid"?'<span class="bdg g">Paid</span>':'<span class="bdg a">Pending</span>';
+      var btn=s.status==="Paid"?"":'<button class="btn btn-g btn-sm" onclick="pay1(\''+s.id+'\')">Pay Now</button>';
+      return "<tr><td><b>"+MC.esc(s.name)+"</b><br><span class='small'>"+MC.esc(s.role)+"</span></td><td class='small'>"+MC.esc(MC.schoolName(s.school))+"</td><td><b>"+MC.inr(s.salary)+"</b></td><td>"+b+"</td><td>"+btn+"</td></tr>";
+    }).join("");
+}
+function pay1(id){ var s=MC.DB.staff.find(function(x){return x.id===id;}); s.status="Paid"; MC.save(); render(); MC.toast(MC.inr(s.salary)+" paid to "+s.name+". Slip sent."); }
+function payAll(){ var n=0; MC.DB.staff.forEach(function(s){if(s.status==="Pending"){s.status="Paid";n++;}}); MC.save(); render(); MC.toast(n+" salaries released. Slips sent on WhatsApp."); }
+render();
+</script>
+</body>
+</html>

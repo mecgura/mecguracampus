@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fees + AI Predictor — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="fees">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>Fees + AI Predictor</h1><p>Your highest-value feature — identify likely late payments before they happen. No competitor offers this.</p></div>
+    <div class="mc-actions"><button class="btn btn-g" onclick="MC.openModal('mCol')">+ Collect Fee</button></div>
+  </div>
+
+  <div class="grid4" id="stats"></div>
+
+  <div class="ai mt">
+    <h2>AI Defaulter Prediction — Priority Follow-up List</h2>
+    <p class="small">Risk above 65% → contact tomorrow. 35–65% → within 3 days. Send WhatsApp reminders in one click.</p>
+    <div style="overflow-x:auto" class="mt"><table class="tbl" id="riskTbl" style="background:#fff;border-radius:12px"></table></div>
+  </div>
+
+  <div class="card mt">
+    <h2>Collections This Month</h2>
+    <div style="overflow-x:auto"><table class="tbl" id="tbl"></table></div>
+  </div>
+</main>
+</div>
+<div class="modal-bg" id="mCol"><div class="modal">
+  <h3>Collect Fee</h3>
+  <div class="fld"><label>Student</label><select id="st"></select></div>
+  <div class="frow"><div class="fld"><label>Amount (Rs.)</label><input id="amt" type="number"></div>
+  <div class="fld"><label>Payment mode</label><select id="mode"><option>UPI</option><option>Cash</option><option>Online</option></select></div></div>
+  <div style="display:flex;gap:8px"><button class="btn btn-g" onclick="collect()">Collect + Send Receipt</button><button class="btn btn-o" onclick="MC.closeModal('mCol')">Cancel</button></div>
+</div></div>
+<script src="assets/app.js"></script>
+<script>
+function refresh(){
+  var dueStu = MC.DB.students.filter(function(s){return s.due>0;});
+  var totalDue = dueStu.reduce(function(a,s){return a+s.due;},0);
+  var collected = MC.DB.fees.reduce(function(a,f){return a+f.amt;},0);
+  var high = dueStu.filter(function(s){return MC.riskOf(s)>65;}).length;
+  document.getElementById("stats").innerHTML =
+    '<div class="card stat"><span>Outstanding (all schools)</span><b>'+MC.inr(totalDue)+'</b><small>'+dueStu.length+' students</small></div>'
+    +'<div class="card stat"><span>Collected (September)</span><b>'+MC.inr(collected)+'</b><small>'+MC.DB.fees.length+' receipts</small></div>'
+    +'<div class="card stat"><span>High-risk accounts</span><b>'+high+'</b><small>contact tomorrow</small></div>'
+    +'<div class="card stat"><span>Auto-reminders sent</span><b>'+MC.DB.msgs.length+'</b><small>via WhatsApp Center</small></div>';
+
+  var rows = dueStu.map(function(s){return {s:s,r:MC.riskOf(s)};}).sort(function(a,b){return b.r-a.r;})
+    .map(function(x){
+      var b=x.r>65?'<span class="bdg r">HIGH — follow up tomorrow</span>':(x.r>35?'<span class="bdg a">MEDIUM</span>':'<span class="bdg g">LOW</span>');
+      return "<tr><td><b>"+MC.esc(x.s.name)+"</b><br><span class='small'>"+MC.esc(x.s.cls)+" • "+MC.esc(MC.schoolName(x.s.school))+"</span></td>"
+      +"<td>"+MC.inr(x.s.due)+"</td><td style='min-width:130px'>"+MC.riskBar(x.r)+"<span class='small'>"+x.r+"%</span></td><td>"+b+"</td>"
+      +"<td><button class='btn btn-g btn-sm' onclick=\"remind('"+x.s.id+"')\">Send Reminder</button></td></tr>";
+    });
+  document.getElementById("riskTbl").innerHTML="<tr><th>Parent</th><th>Outstanding</th><th>AI Risk</th><th>Priority</th><th></th></tr>"+(rows.join("")||"<tr><td colspan=5>No outstanding dues — all clear.</td></tr>");
+  document.getElementById("tbl").innerHTML="<tr><th>Receipt</th><th>School</th><th>Amount</th><th>Date • Mode</th></tr>"+
+    MC.DB.fees.slice().reverse().map(function(f){return "<tr><td><b>"+MC.esc(f.student)+"</b></td><td class='small'>"+MC.esc(f.school)+"</td><td><b>"+MC.inr(f.amt)+"</b></td><td class='small'>"+MC.esc(f.date)+" • "+MC.esc(f.mode)+"</td></tr>";}).join("");
+  document.getElementById("st").innerHTML = dueStu.map(function(s){return '<option value="'+s.id+'">'+MC.esc(s.name)+' — '+MC.inr(s.due)+' outstanding</option>';}).join("")||"<option value=''>No outstanding dues</option>";
+}
+function collect(){
+  var id=document.getElementById("st").value; if(!id){MC.toast("Nothing outstanding. All fees are clear.");return;}
+  var s=MC.DB.students.find(function(x){return x.id===id;});
+  var amt=Math.min(+document.getElementById("amt").value||s.due, s.due);
+  s.due-=amt;
+  MC.DB.fees.push({id:MC.uid("f"),student:s.name,school:MC.schoolName(s.school),amt:amt,date:"2026-09-09",mode:document.getElementById("mode").value});
+  MC.DB.msgs.push({id:MC.uid("m"),to:s.name+" (Parent)",tpl:"Payment Receipt",lang:"Punjabi",date:"2026-09-09",status:"Delivered"});
+  MC.save();MC.closeModal("mCol");refresh();MC.toast("Rs. "+amt+" collected. Receipt sent on WhatsApp.");
+}
+function remind(id){
+  var s=MC.DB.students.find(function(x){return x.id===id;});
+  MC.DB.msgs.push({id:MC.uid("m"),to:s.name+" (Parent)",tpl:"AI Fee Reminder",lang:"Punjabi",date:"2026-09-09",status:"Sent"}); MC.save();
+  MC.toast("Reminder sent to " + s.name + "."); refresh();
+}
+refresh();
+</script>
+</body>
+</html>

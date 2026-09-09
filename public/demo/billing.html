@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plans & Billing — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="billing">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>Plans &amp; Billing — Your Revenue</h1><p>Every rupee from every school, tracked here. Overdue → automatic reminder → automatic suspension.</p></div>
+  </div>
+  <div class="grid4" id="stats"></div>
+  <div class="grid3 mt">
+    <div class="card" style="border:2px solid #CBD6CB"><h2>Trial — 7 Days</h2><b style="font-size:26px">Rs. 0</b><p class="small mt">The complete system for up to 100 students. No card required — let the school experience it first.</p></div>
+    <div class="card" style="border:2px solid #78ce57"><h2>Monthly <span class="bdg br">Most Popular</span></h2><b style="font-size:26px">Rs. 2,499</b><span class="small"> / month</span><p class="small mt">Unlimited students, 5,000 WhatsApp messages, bus GPS and priority support.</p></div>
+    <div class="card" style="border:2px solid #0C160D"><h2>Annual <span class="bdg b">2 Months Free</span></h2><b style="font-size:26px">Rs. 24,999</b><span class="small"> / year</span><p class="small mt">Everything in Monthly, plus the AI Predictor, dedicated support line and free onboarding (worth Rs. 9,999).</p></div>
+  </div>
+  <div class="card mt">
+    <h2>School Subscriptions</h2>
+    <div style="overflow-x:auto"><table class="tbl" id="tbl"></table></div>
+  </div>
+</main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+function render(){
+  var mrr=0; MC.DB.schools.forEach(function(s){ if(s.status==="Paid"){ mrr += s.plan.indexOf("Annual")===0?2083:2499; } });
+  var due=MC.DB.schools.reduce(function(a,s){return a+(s.due||0);},0);
+  document.getElementById("stats").innerHTML =
+    '<div class="card stat"><span>MRR (recurring monthly)</span><b>'+MC.inr(Math.round(mrr))+'</b><small>3 paying schools</small></div>'
+    +'<div class="card stat"><span>SaaS overdue</span><b>'+MC.inr(due)+'</b><small>Akal Academy</small></div>'
+    +'<div class="card stat"><span>Active trials</span><b>1</b><small>City Montessori — 6 days left</small></div>'
+    +'<div class="card stat"><span>Annual target</span><b>50 schools</b><small>= Rs. 10L+ / year</small></div>';
+  document.getElementById("tbl").innerHTML="<tr><th>School</th><th>Plan</th><th>Status</th><th></th></tr>"+
+    MC.DB.schools.map(function(s){
+      var b=s.status==="Paid"?'<span class="bdg g">Active</span>':(s.status==="Due"?'<span class="bdg a">Overdue — reminders on</span>':(s.status==="Off"?'<span class="bdg r">Suspended</span>':'<span class="bdg gr">Trial</span>'));
+      var btn=s.status==="Due"?'<button class="btn btn-g btn-sm" onclick="collectSaaS(\''+s.id+'\')">Record Payment</button>':"";
+      return "<tr><td><b>"+MC.esc(s.name)+"</b></td><td class='small'>"+MC.esc(s.plan)+"</td><td>"+b+"</td><td>"+btn+"</td></tr>";
+    }).join("");
+}
+function collectSaaS(id){ var s=MC.DB.schools.find(function(x){return x.id===id;}); s.due=0; s.status="Paid"; MC.save(); render(); MC.toast("Subscription payment recorded for "+s.name+"."); }
+render();
+</script>
+</body>
+</html>

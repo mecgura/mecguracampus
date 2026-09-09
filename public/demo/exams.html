@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exams & Report Card — MecguraCampus</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="exams">
+<div class="mc-shell">
+<aside class="mc-side" id="mc-side"></aside>
+<main class="mc-main">
+  <div class="mc-top" id="mc-top">
+    <div><h1>Examinations &amp; Report Cards</h1><p>Enter marks → the report card is generated → delivered to the parent app. One-click printing included.</p></div>
+    <div class="mc-actions"><button class="btn btn-o" onclick="window.print()">Print Report</button><button class="btn btn-g" onclick="publish()">Publish Results</button></div>
+  </div>
+  <div class="card">
+    <h2>Class 10-A — Final Examination (out of 100)</h2>
+    <div class="toolbar"><input id="m1" type="number" value="82" style="width:90px" title="Mathematics"><input id="m2" type="number" value="76" style="width:90px" title="English"><input id="m3" type="number" value="88" style="width:90px" title="Science"><input id="m4" type="number" value="91" style="width:90px" title="Punjabi"><button class="btn btn-g btn-sm" onclick="make()">Generate Report</button></div>
+    <p class="small">Mathematics • English • Science • Punjabi — adjust the marks and press Generate (demonstration: Arshdeep Singh).</p>
+  </div>
+  <div class="card mt print-area" id="rc">
+    <h2>Report Card <span class="small">2025-26 • Guru Nanak Public School</span></h2>
+    <div id="rcBody"><p class="small">Enter marks and press Generate Report…</p></div>
+  </div>
+</main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+function grade(a){return a>=90?"A+":a>=80?"A":a>=70?"B+":a>=60?"B":a>=50?"C":"F";}
+function make(){
+  var m=[+document.getElementById("m1").value||0,+document.getElementById("m2").value||0,+document.getElementById("m3").value||0,+document.getElementById("m4").value||0];
+  var subs=["Mathematics","English","Science","Punjabi"], tot=m.reduce(function(a,b){return a+b;},0), pct=Math.round(tot/4);
+  document.getElementById("rcBody").innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0C160D;padding-bottom:10px;margin-bottom:12px"><div><b style="font-size:16px">Arshdeep Singh</b><div class="small">Class 10-A • Roll No. 12</div></div><div style="text-align:right"><b style="font-size:22px">'+pct+'%</b><div><span class="bdg '+(pct>=75?"g":"a")+'">'+grade(pct)+' Grade</span></div></div></div>'
+    +'<table class="tbl">'+subs.map(function(s,i){return "<tr><td>"+s+"</td><td><b>"+m[i]+" / 100</b></td><td>"+grade(m[i])+"</td></tr>";}).join("")+"</table>"
+    +'<p class="small mt">Class teacher\u2019s remark: Excellent, consistent effort. • Principal\u2019s signature: __________</p>';
+  MC.toast("Report card generated.");
+}
+function publish(){ MC.DB.msgs.push({id:MC.uid("m"),to:"Class 10-A Parents (86)",tpl:"Result Published",lang:"English",date:"2026-09-09",status:"Sent"}); MC.save(); MC.toast("Results published. 86 parents notified."); }
+</script>
+</body>
+</html>
