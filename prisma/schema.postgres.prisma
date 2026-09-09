@@ -53,6 +53,10 @@ model School {
   leads    Lead[]
   devices  Device[]
   notices  Notice[]
+  slots    TimetableSlot[]
+  menus    MealMenu[]
+  leaves   StaffLeave[]
+  stars    StarPoint[]
 
   @@index([status])
 }
@@ -75,6 +79,7 @@ model Student {
   receipts FeeReceipt[]
   presence AttendanceRecord[]
   exams    ExamResult[]
+  stars    StarPoint[]
 
   @@index([schoolId])
   @@index([name])
@@ -88,9 +93,10 @@ model StaffMember {
   role       String @default("")
   schoolId   String
   school     School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  salary     Int    @default(0)
-  status     String @default("Pending") // "Pending" | "Paid"
+  salary   Int    @default(0)
+  status   String @default("Pending") // "Pending" | "Paid"
   deviceCode String @default("") // biometric/PDS machine user ID
+  leaves   StaffLeave[]
 
   @@index([schoolId])
   @@index([deviceCode])
@@ -183,6 +189,64 @@ model ExamResult {
   term      String  @default("Final")
 
   @@unique([studentId, subject, term])
+}
+
+// ---- Daily Routine: timetable, tiffin, leaves, behaviour stars ----
+model TimetableSlot {
+  id        String  @id @default(cuid())
+  schoolId  String?
+  school    School? @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  day       Int     @default(1) // 0=Sun..6=Sat
+  periodNo  Int     @default(1)
+  start     String  @default("09:00") // HH:MM 24h
+  end       String  @default("09:40")
+  subject   String  @default("")
+  teacher   String  @default("")
+  className String  @default("")
+
+  @@index([schoolId, day])
+}
+
+model MealMenu {
+  id       String  @id @default(cuid())
+  schoolId String?
+  school   School? @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  day      Int     @default(1) // 0=Sun..6=Sat
+  meal     String  @default("Lunch")
+  items    String  @default("")
+
+  @@index([schoolId, day])
+}
+
+model StaffLeave {
+  id         String      @id @default(cuid())
+  staffId    String
+  staff      StaffMember @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  schoolId   String?
+  school     School?     @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  date       String // YYYY-MM-DD
+  reason     String @default("")
+  substitute String @default("")
+  status     String @default("Pending") // Pending|Approved|Rejected
+
+  @@index([schoolId, date])
+  @@index([staffId])
+}
+
+model StarPoint {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  schoolId  String?
+  school    School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  points    Int      @default(1)
+  note      String   @default("")
+  givenBy   String   @default("")
+  date      String   @default("") // YYYY-MM-DD
+  createdAt DateTime @default(now())
+
+  @@index([studentId])
+  @@index([schoolId])
 }
 
 // ---- Notices / Homework (school → parent app) ----

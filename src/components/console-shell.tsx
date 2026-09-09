@@ -20,6 +20,7 @@ const NAV: { href: string; label: string; ico: string; super?: boolean; isNew?: 
   { href: "/console/import", label: "Sheet Import", ico: "📥", super: true, isNew: true },
   { href: "/console/fees", label: "Fees + AI Predictor", ico: "💰", isNew: true },
   { href: "/console/attendance", label: "Attendance", ico: "📋" },
+  { href: "/console/routine", label: "Daily Routine", ico: "🗓️", isNew: true },
   { href: "/console/exams", label: "Exams & Report Card", ico: "🏆" },
   { href: "/console/transport", label: "Transport GPS", ico: "🚌" },
   { href: "/console/devices", label: "Devices", ico: "📡", isNew: true },

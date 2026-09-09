@@ -70,6 +70,42 @@ export const noticeSchema = z.object({
 });
 export type NoticeInput = z.infer<typeof noticeSchema>;
 
+export const slotSchema = z.object({
+  schoolId: z.string().optional(),
+  day: z.coerce.number().int().min(0).max(6),
+  periodNo: z.coerce.number().int().min(1).max(12),
+  start: z.string().regex(/^\d{2}:\d{2}$/),
+  end: z.string().regex(/^\d{2}:\d{2}$/),
+  subject: z.string().min(1).max(60),
+  teacher: z.string().max(80).optional().default(""),
+  className: z.string().max(20).optional().default(""),
+});
+export type SlotInput = z.infer<typeof slotSchema>;
+
+export const menuSchema = z.object({
+  schoolId: z.string().optional(),
+  day: z.coerce.number().int().min(0).max(6),
+  meal: z.string().max(30).optional().default("Lunch"),
+  items: z.string().min(1).max(300),
+});
+export type MenuInput = z.infer<typeof menuSchema>;
+
+export const leaveSchema = z.object({
+  staffId: z.string().min(1),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  reason: z.string().max(200).optional().default(""),
+  substitute: z.string().max(80).optional().default(""),
+});
+export type LeaveInput = z.infer<typeof leaveSchema>;
+
+export const starSchema = z.object({
+  studentId: z.string().min(1),
+  points: z.coerce.number().int().min(1).max(10).default(1),
+  note: z.string().max(200).optional().default(""),
+  givenBy: z.string().max(80).optional().default(""),
+});
+export type StarInput = z.infer<typeof starSchema>;
+
 export const STAGES_APPLICATION = ["Applied", "Screening", "Interview", "Demo", "Offer", "Hired", "Rejected"] as const;
 export const STAGES_LEAD = ["New", "Contacted", "Visit Scheduled", "Visited", "Admitted", "Lost"] as const;
 

@@ -5,8 +5,18 @@ import { useCallback, useEffect, useState } from "react";
 interface Kid {
   id: string; name: string; class: string; school: string; schoolId: string;
   feeMonthly: number; feeDue: number; attendance: number;
+  presentToday: boolean | null; stars: number;
   exams: { subject: string; marks: number }[];
   receipts: { amount: number; date: string; mode: string }[];
+}
+interface DayInfo {
+  school: string; date: string; time: string; status: string;
+  current: { subject: string; teacher: string; className: string; start: string; end: string } | null;
+  minsLeft: number;
+  next: { subject: string; start: string } | null;
+  periods: { subject: string; start: string; end: string }[];
+  tiffin: { meal: string; items: string }[];
+  leavesOn: { name: string; role: string; reason: string; substitute: string }[];
 }
 interface Notice { id: string; title: string; body: string; audience: string; createdAt: string; school: { name: string } | null }
 interface Bus { id: string; number: string; route: string; status: string }
@@ -24,6 +34,7 @@ export default function ParentHome() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [loading, setLoading] = useState(true);
   const [payMsg, setPayMsg] = useState("");
+  const [day, setDay] = useState<DayInfo | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -35,6 +46,11 @@ export default function ParentHome() {
       setNotices(j.notices);
       setBuses(j.buses);
       setMsgs(j.messages);
+      const firstSchool = j.kids?.[0]?.schoolId;
+      if (firstSchool) {
+        const d = await fetch(`/api/school-day?schoolId=${firstSchool}`);
+        if (d.ok) setDay(await d.json());
+      }
     }
     setLoading(false);
   }, []);
@@ -76,6 +92,33 @@ export default function ParentHome() {
       <h1 style={{ fontSize: 22 }}>Sat Sri Akal, {name}</h1>
       <p className="small">Your children, fees, results and school bus — all here.</p>
       {payMsg ? <p className="alert info mt">{payMsg}</p> : null}
+
+      {day ? (
+        <div className="card mt" style={{ border: "2px solid #78ce57" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+            <h2 style={{ margin: 0 }}>Today at {day.school}</h2>
+            <span className={`bdg ${day.status === "In Session" ? "g" : day.status === "Holiday" ? "gr" : "a"}`}>
+              {day.status === "In Session" ? "● LIVE" : day.status} • {day.time}
+            </span>
+          </div>
+          {day.current ? (
+            <p className="mt"><b>Now: {day.current.subject}</b> <span className="small">• {day.current.teacher} • ends in {day.minsLeft} min</span></p>
+          ) : day.next ? (
+            <p className="mt"><b>Next: {day.next.subject}</b> <span className="small">• at {day.next.start}</span></p>
+          ) : (
+            <p className="small mt">{day.status === "Holiday" ? "No classes today — enjoy the holiday." : "School hours are over for today."}</p>
+          )}
+          {kids.map((k) => (
+            <p className="small" key={k.id}>
+              <b>{k.name}</b> — today: {k.presentToday === null ? "not marked yet" : k.presentToday ? "Present ✓" : "Absent"} • ⭐ {k.stars} stars
+            </p>
+          ))}
+          {day.tiffin.length > 0 ? <p className="small">🍱 Tiffin: <b>{day.tiffin.map((t) => t.items).join(" | ")}</b></p> : null}
+          {day.leavesOn.length > 0 ? (
+            <p className="small">📝 On leave today: {day.leavesOn.map((l) => `${l.name} (${l.role}) — substitute: ${l.substitute}`).join("; ")}</p>
+          ) : <p className="small">📝 All teachers present today.</p>}
+        </div>
+      ) : null}
 
       {kids.map((k) => (
         <div className="card mt" key={k.id}>
