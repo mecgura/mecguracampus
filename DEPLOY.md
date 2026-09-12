@@ -19,7 +19,8 @@ nano .env.deploy
 #       APP_DOMAIN=www.campus.mecgura.com
 
 # ---- 3. DNS (domain panel, where mecgura.com lives) ----
-# Add record:  Type A | Host: www.campus | Value: <VPS-IP> | TTL: 300
+# DELETE old Vercel CNAME rows named `campus` and `www.campus` (they block the A record).
+# Then add:  Type A | Host: campus | Value: <VPS-IP> | TTL: 300
 # Wait 5-15 min, then continue (Caddy needs DNS to issue SSL).
 
 # ---- 4. Launch ----
