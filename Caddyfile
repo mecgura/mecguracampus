@@ -1,0 +1,5 @@
+# Caddy reverse proxy — auto HTTPS, zero config.
+# Point DNS:  www.campus.mecgura.com  A  <VPS-IP>   (and later mecgura.com)
+www.campus.mecgura.com {
+	reverse_proxy app:3000
+}

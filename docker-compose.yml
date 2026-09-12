@@ -1,0 +1,52 @@
+# MecguraCampus on one VPS: app + postgres + Caddy (auto HTTPS).
+# Usage on the VPS (Ubuntu):
+#   git clone https://<GITHUB-TOKEN>@github.com/mecgura/mecguracampus /opt/campus
+#   cd /opt/campus
+#   cp .env.deploy.example .env.deploy   # then fill secrets
+#   docker compose --env-file .env.deploy up -d --build
+#   docker compose exec app npx tsx prisma/seed.ts
+#   docker compose exec app npx tsx prisma/seed-extras.ts
+#   docker compose exec app npx tsx prisma/seed-parents.ts
+#   docker compose exec app npx tsx prisma/seed-routine.ts
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: campus
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: mecguracampus
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://campus:${DB_PASSWORD}@db:5432/mecguracampus?sslmode=disable
+      PRISMA_SCHEMA: prisma/schema.postgres.prisma
+      AUTH_SECRET: ${AUTH_SECRET}
+      NEXTAUTH_URL: https://${APP_DOMAIN}
+    depends_on:
+      - db
+    expose:
+      - "3000"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  caddydata:
+  caddyconfig:
