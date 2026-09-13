@@ -8,6 +8,7 @@ RUN npm ci
 COPY . .
 ENV NODE_ENV=production
 ENV PRISMA_SCHEMA=prisma/schema.postgres.prisma
+ENV DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy?sslmode=disable
 RUN npx prisma generate
 RUN npm run build
 EXPOSE 3000
