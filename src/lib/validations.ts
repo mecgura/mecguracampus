@@ -181,6 +181,15 @@ export const devicePushSchema = z.object({
 });
 export type DevicePushInput = z.infer<typeof devicePushSchema>;
 
+export const userSchema = z.object({
+  name: z.string().min(2).max(120),
+  email: z.string().email(),
+  password: z.string().min(6).max(120),
+  role: z.enum(["super", "school", "parent"]).default("school"),
+  schoolId: z.string().optional().default(""),
+});
+export type UserInput = z.infer<typeof userSchema>;
+
 export const importRowSchema = z.object({
   name: z.string().min(1).max(120),
   class: z.string().max(20).optional().default(""),

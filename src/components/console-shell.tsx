@@ -14,6 +14,7 @@ export interface ConsoleUser {
 const NAV: { href: string; label: string; ico: string; super?: boolean; isNew?: boolean }[] = [
   { href: "/console", label: "Super Dashboard", ico: "📊", super: true },
   { href: "/console/onboarding", label: "New School Setup", ico: "🚀", super: true, isNew: true },
+  { href: "/console/users", label: "User Accounts", ico: "👤", super: true, isNew: true },
   { href: "/console/schools", label: "All Schools", ico: "🏫", super: true },
   { href: "/console/students", label: "Students", ico: "🎓" },
   { href: "/console/staff", label: "Staff & Payroll", ico: "👨‍🏫" },

@@ -16,6 +16,15 @@ function inr(n: number) {
   return "Rs. " + n.toLocaleString("en-IN");
 }
 
+const QUICK = [
+  { href: "/console/users", label: "Create User", ico: "👤", color: "#7c3aed" },
+  { href: "/console/schools", label: "Add School", ico: "🏫", color: "#2563eb" },
+  { href: "/console/onboarding", label: "New School Setup", ico: "🚀", color: "#059669" },
+  { href: "/console/messages", label: "Send WhatsApp", ico: "💬", color: "#16a34a" },
+  { href: "/console/import", label: "Import Data", ico: "📥", color: "#ea580c" },
+  { href: "/console/fees", label: "Fees + AI", ico: "💰", color: "#ca8a04" },
+];
+
 export default function ConsoleHome() {
   const [data, setData] = useState<Overview | null>(null);
   const [error, setError] = useState("");
@@ -51,6 +60,23 @@ export default function ConsoleHome() {
           <p>Revenue, schools, students and transport — live from the database.</p>
         </div>
       </div>
+
+      {/* Quick Actions */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <h2 style={{ marginBottom: 10 }}>Quick Actions</h2>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {QUICK.map((q) => (
+            <Link key={q.href} href={q.href} style={{
+              display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px",
+              borderRadius: 10, background: q.color + "12", color: q.color, fontWeight: 600,
+              fontSize: 13, textDecoration: "none", border: `1px solid ${q.color}30`,
+            }}>
+              <span style={{ fontSize: 16 }}>{q.ico}</span> {q.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
       <div className="grid4">
         <div className="card stat"><span>Total Schools</span><b>{t.schools}</b><small>tenants on platform</small></div>
         <div className="card stat"><span>Total Students</span><b>{t.students.toLocaleString("en-IN")}</b><small>across all schools</small></div>

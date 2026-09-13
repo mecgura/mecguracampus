@@ -65,7 +65,13 @@ a.stat:hover,div.stat:hover{border-color:var(--brand)}
 .login-card{width:100%;max-width:420px;border-radius:18px;border:1px solid var(--line);background:#fff;padding:32px;box-shadow:var(--sh)}
 .alert{border-radius:10px;padding:11px 14px;font-size:13px;margin-bottom:12px}
 .alert.err{background:var(--red-bg);color:#991b1b;border:1px solid #fecaca}
+.alert.ok{background:var(--green-bg);color:#065f46;border:1px solid #a7f3d0}
 .alert.info{background:var(--blue-bg);color:#1d4ed8;border:1px solid #bfdbfe}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h2{margin-bottom:4px}
+.modal .inp{margin-bottom:0}
+.modal select.inp{appearance:auto}
 .mt{margin-top:14px}.mb{margin-bottom:14px}.small{font-size:12px;color:var(--muted)}
 .check{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:10px;background:#fff;font-size:13px}
 .check.done{border-color:var(--brand);background:var(--brand-bg)}
