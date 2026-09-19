@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -9,7 +9,6 @@ export const metadata: Metadata = {
   description: "MecguraCampusOS — one platform for every school. Multi-tenant SaaS school ERP.",
   robots: { index: false, follow: false },
   manifest: "/manifest.webmanifest",
-  themeColor: "#0C160D",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "MecguraCampus" },
   icons: {
     icon: [
@@ -18,6 +17,10 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0C160D",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -4,6 +4,13 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 
+const FEATURES = [
+  { ico: "💰", label: "Fees, dues and AI collection risk — in one place" },
+  { ico: "🚌", label: "Live transport tracking for every bus" },
+  { ico: "📋", label: "Attendance, exams and daily routine automated" },
+  { ico: "💬", label: "WhatsApp updates straight to parents" },
+];
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -39,32 +46,68 @@ function LoginForm() {
   }
 
   return (
-    <div className="login-card">
-      <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <span className="mc-mark" style={{ width: 48, height: 48, fontSize: 24, margin: "0 auto" }}>M</span>
-        <h1 style={{ fontSize: 22, marginTop: 12 }}>Sign In</h1>
-        <p className="small">Owner, school and parent access.</p>
-      </div>
-      {serverError ? <p className="alert err" role="alert">{serverError}</p> : null}
-      <form onSubmit={onSubmit} noValidate>
-        <div className="fld">
-          <label htmlFor="email">Email</label>
-          <input id="email" className="inp" type="email" autoComplete="email" placeholder="owner@mecguracampus.com"
-            value={email} onChange={(e) => setEmail(e.target.value)} required />
+    <div className="auth-shell">
+      <aside className="auth-side">
+        <div className="auth-brand">
+          <span className="mc-mark" style={{ width: 44, height: 44, fontSize: 20 }}>M</span>
+          <span>
+            <b>MecguraCampus</b>
+            <small>School Management OS</small>
+          </span>
         </div>
-        <div className="fld">
-          <label htmlFor="password">Password</label>
-          <input id="password" className="inp" type="password" autoComplete="current-password" placeholder="••••••••"
-            value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <div className="auth-pitch">
+          <h2>Run your whole campus from one dashboard.</h2>
+          <p>Fees, attendance, transport, staff and parents — connected in real time, built for Indian schools.</p>
+          <ul className="auth-features">
+            {FEATURES.map((f) => (
+              <li key={f.label}>
+                <span className="fico">{f.ico}</span>
+                {f.label}
+              </li>
+            ))}
+          </ul>
         </div>
-        <button className="btn btn-g" style={{ width: "100%", height: 48 }} disabled={loading} type="submit">
-          {loading ? "Signing in…" : "Sign In"}
-        </button>
-      </form>
-      <div className="alert info mt">
-        Demo accounts — Super: <b>owner@mecguracampus.com / Admin@12345</b>
-        <br />School: <b>school@gnps.com / School@12345</b>
-        <br />Parent: <b>parent.arshdeep@example.com / Parent@12345</b>
+        <p className="auth-foot">© {new Date().getFullYear()} MecguraCampus · Powered by MECGURA</p>
+      </aside>
+
+      <div className="auth-form-side">
+        <div className="auth-card">
+          <h1>Welcome back</h1>
+          <p className="sub">Sign in to your campus dashboard.</p>
+
+          {serverError ? <p className="alert err" role="alert">{serverError}</p> : null}
+
+          <form onSubmit={onSubmit} noValidate>
+            <div className="fld">
+              <label htmlFor="email">Email</label>
+              <div className="auth-inp-wrap">
+                <span className="fico2">✉️</span>
+                <input id="email" className="inp" type="email" autoComplete="email" placeholder="you@school.com"
+                  value={email} onChange={(e) => setEmail(e.target.value)} required />
+              </div>
+            </div>
+            <div className="fld">
+              <label htmlFor="password">Password</label>
+              <div className="auth-inp-wrap">
+                <span className="fico2">🔒</span>
+                <input id="password" className="inp" type="password" autoComplete="current-password" placeholder="••••••••"
+                  value={password} onChange={(e) => setPassword(e.target.value)} required />
+              </div>
+            </div>
+            <button className="btn btn-g auth-submit" disabled={loading} type="submit">
+              {loading ? "Signing in…" : "Sign In"}
+            </button>
+          </form>
+
+          <details className="auth-demo">
+            <summary>Demo credentials (for evaluation)</summary>
+            <div className="auth-demo-body">
+              <div>Super Admin — <b>owner@mecguracampus.com</b> / Admin@12345</div>
+              <div>School Admin — <b>school@gnps.com</b> / School@12345</div>
+              <div>Parent — <b>parent.arshdeep@example.com</b> / Parent@12345</div>
+            </div>
+          </details>
+        </div>
       </div>
     </div>
   );
@@ -72,10 +115,8 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="login-wrap">
-      <Suspense fallback={<p className="small">Loading…</p>}>
-        <LoginForm />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="auth-shell" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

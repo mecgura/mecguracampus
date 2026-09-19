@@ -8,7 +8,7 @@
     "start": "next start",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts && tsx prisma/seed-extras.ts && tsx prisma/seed-parents.ts && tsx prisma/seed-routine.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.0",
