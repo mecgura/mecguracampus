@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 // Edge-safe: verifies the Auth.js JWT session cookie without importing the DB.
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isConsole = pathname === "/console" || pathname.startsWith("/console/");
   const isParent = pathname === "/parent" || pathname.startsWith("/parent/");

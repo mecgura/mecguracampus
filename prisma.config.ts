@@ -7,7 +7,7 @@ export default defineConfig({
   schema: process.env.PRISMA_SCHEMA ?? "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
-    seed: "tsx prisma/seed.ts",
+    seed: "tsx prisma/seed.ts && tsx prisma/seed-extras.ts && tsx prisma/seed-parents.ts && tsx prisma/seed-routine.ts",
   },
   datasource: {
     // Fallback keeps `prisma generate` working even when DATABASE_URL
